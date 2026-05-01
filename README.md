@@ -1,34 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# House Rental Platform
 
-## Getting Started
+A production-ready multilingual house rental marketplace built with Next.js App Router, TypeScript, Tailwind CSS, and shadcn-style UI.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- English and Arabic support
+- Full RTL support for Arabic
+- Localized routes such as `/en/properties` and `/ar/properties`
+- Public website, auth pages, seller dashboard, and admin dashboard
+- Responsive premium SaaS UI
+- Mock data with reusable components
+- Dark mode ready
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Roles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- User
+- Seller
+- Admin
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` — start the development server
+- `npm run build` — build for production
+- `npm run start` — run the production server
+- `npm run lint` — run ESLint
+- `npm run typecheck` — run the TypeScript compiler
+- `npm run prisma:generate` — generate Prisma Client
+- `npm run prisma:migrate` — create/apply local PostgreSQL migrations
+- `npm run prisma:studio` — open Prisma Studio
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Prisma + PostgreSQL Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL connection string.
+2. Generate Prisma Client:
+   - `npm run prisma:generate`
+3. Create/apply your first migration:
+   - `npm run prisma:migrate -- --name init`
+4. (Optional) Browse data:
+   - `npm run prisma:studio`
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Selected language is stored in a cookie and synced through localized routes.
+- Arabic uses RTL layout automatically.
+- Seller limits are mocked as Free: 3, Pro: 10, Premium: unlimited.
