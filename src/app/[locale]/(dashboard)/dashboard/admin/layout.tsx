@@ -1,14 +1,18 @@
 import type { ReactNode } from "react";
 import {
   BarChart3,
+  MapPinned,
   FileBadge2,
   ListChecks,
+  Tags,
   Users,
   Settings2,
 } from "lucide-react";
-import { DashboardShell } from "@/components/dashboard-shell";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function AdminDashboardLayout({
   children,
@@ -18,6 +22,16 @@ export default async function AdminDashboardLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = (await params) as { locale: Locale };
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect(`/${locale}/login`);
+  }
+
+  if (session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
+
   const messages = getMessages(locale);
 
   const items = [
@@ -37,6 +51,16 @@ export default async function AdminDashboardLayout({
       icon: <ListChecks className="h-4 w-4" />,
     },
     {
+      label: messages.dashboard.admin.categories,
+      href: `/${locale}/dashboard/admin/categories`,
+      icon: <Tags className="h-4 w-4" />,
+    },
+    {
+      label: messages.dashboard.admin.cities,
+      href: `/${locale}/dashboard/admin/cities`,
+      icon: <MapPinned className="h-4 w-4" />,
+    },
+    {
       label: messages.dashboard.admin.plans,
       href: `/${locale}/dashboard/admin/plans`,
       icon: <Settings2 className="h-4 w-4" />,
@@ -52,7 +76,13 @@ export default async function AdminDashboardLayout({
     <DashboardShell
       locale={locale}
       title={messages.dashboard.admin.title}
-      roleLabel={locale === "ar" ? "حساب المدير" : "Admin account"}
+      roleLabel={
+        locale === "ar"
+          ? "حساب المدير"
+          : locale === "fr"
+            ? "Compte administrateur"
+            : "Admin account"
+      }
       items={items}
     >
       {children}

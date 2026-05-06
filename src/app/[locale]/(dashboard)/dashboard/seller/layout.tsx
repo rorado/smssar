@@ -7,9 +7,11 @@ import {
   Settings2,
   UserRound,
 } from "lucide-react";
-import { DashboardShell } from "@/components/dashboard-shell";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function SellerDashboardLayout({
   children,
@@ -19,6 +21,22 @@ export default async function SellerDashboardLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = (await params) as { locale: Locale };
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect(`/${locale}/login`);
+  }
+
+  if (session.user.role !== "SELLER") {
+    return (
+      <div className="rounded-3xl border border-border/70 bg-card p-8 text-sm text-muted-foreground">
+        {locale === "ar"
+          ? "هذه الصفحة متاحة للبائعين فقط."
+          : "This page is available to sellers only."}
+      </div>
+    );
+  }
+
   const messages = getMessages(locale);
 
   const items = [

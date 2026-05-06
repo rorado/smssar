@@ -53,12 +53,6 @@ export function SiteFooter({
             >
               {messages.nav.pricing}
             </Link>
-            <Link
-              href={`/${locale}/dashboard/seller`}
-              className="text-foreground/80 transition hover:text-foreground"
-            >
-              {messages.nav.seller}
-            </Link>
           </div>
         </div>
         <div>

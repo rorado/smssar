@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import {
   ChevronLeft,
   Menu,
   PanelLeftClose,
-  ShieldCheck,
+  LogOut,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,11 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/locales";
 import type { ReactNode } from "react";
+
+const t = <T extends { en: string; ar: string; fr: string }>(
+  locale: Locale,
+  text: T,
+) => text[locale] ?? text.en;
 
 export interface DashboardNavItem {
   label: string;
@@ -35,6 +42,7 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -64,27 +72,56 @@ export function DashboardShell({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="lg:hidden"
+                className="cursor-pointer lg:hidden"
               >
                 <PanelLeftClose className="h-5 w-5" />
               </button>
             </div>
             <nav className="flex-1 space-y-1 p-4">
-              {items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              ))}
+              {items.map((item, index) => {
+                const isActive =
+                  pathname === item.href ||
+                  (index !== 0 && pathname.startsWith(`${item.href}/`));
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+                      isActive
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "absolute inset-y-2 right-2 w-1 rounded-full bg-violet-500 transition-opacity",
+                        isActive
+                          ? "opacity-100"
+                          : "opacity-0 group-hover:opacity-60",
+                      )}
+                    />
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
             <div className="border-t border-border/60 p-4">
-              <Button variant="outline" className="w-full justify-between">
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                onClick={() => void signOut({ callbackUrl: `/${locale}` })}
+              >
                 <span className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4" /> {locale.toUpperCase()}
+                  <LogOut className="h-4 w-4" />{" "}
+                  {t(locale, {
+                    en: "Logout",
+                    ar: "تسجيل الخروج",
+                    fr: "Déconnexion",
+                  })}
                 </span>
                 <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
               </Button>
@@ -99,7 +136,7 @@ export function DashboardShell({
                 <button
                   type="button"
                   onClick={() => setOpen((value) => !value)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm lg:hidden"
+                  className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm lg:hidden"
                 >
                   <Menu className="h-5 w-5" />
                 </button>
@@ -112,6 +149,18 @@ export function DashboardShell({
               </div>
               <div className="flex items-center gap-3">
                 <LanguageSwitcher currentLocale={locale} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void signOut({ callbackUrl: `/${locale}` })}
+                >
+                  <LogOut className="h-4 w-4" />
+                  {t(locale, {
+                    en: "Logout",
+                    ar: "تسجيل الخروج",
+                    fr: "Déconnexion",
+                  })}
+                </Button>
               </div>
             </div>
           </header>

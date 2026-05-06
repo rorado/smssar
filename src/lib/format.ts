@@ -1,13 +1,13 @@
 import type { Locale } from "@/lib/locales";
 
 function toIntlLocale(locale: Locale | string) {
-  return locale === "ar" ? "ar-AE" : "en-AE";
+  return locale === "ar" ? "ar-MA" : "en-MA";
 }
 
 export function formatCurrency(value: number, locale: Locale) {
   return new Intl.NumberFormat(toIntlLocale(locale), {
     style: "currency",
-    currency: "AED",
+    currency: "MAD",
     maximumFractionDigits: 0,
   }).format(value);
 }

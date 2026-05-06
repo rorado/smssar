@@ -7,12 +7,14 @@ import { prisma } from "@/lib/prisma";
 declare module "next-auth" {
   interface User {
     role: "USER" | "SELLER" | "ADMIN";
+    planId: string;
   }
 
   interface Session {
     user: {
       id: string;
       role: "USER" | "SELLER" | "ADMIN";
+      planId: string;
     } & DefaultSession["user"];
   }
 }
@@ -21,6 +23,7 @@ declare module "@auth/core/jwt" {
   interface JWT {
     id?: string;
     role?: "USER" | "SELLER" | "ADMIN";
+    planId?: string;
   }
 }
 
@@ -70,6 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           email: user.email,
           role: user.role,
+          planId: user.planId,
         };
       },
     }),
@@ -79,6 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.planId = user.planId;
       }
       return token;
     },
@@ -90,6 +95,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           | "USER"
           | "SELLER"
           | "ADMIN";
+        session.user.planId =
+          typeof token.planId === "string" ? token.planId : "free";
       }
       return session;
     },

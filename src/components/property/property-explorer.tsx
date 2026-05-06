@@ -1,0 +1,398 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Search, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { PropertyCard } from "@/components/property/property-card";
+import type { Locale } from "@/lib/locales";
+
+const t = <T extends { en: string; ar: string; fr: string }>(
+  locale: Locale,
+  text: T,
+) => text[locale] ?? text.en;
+
+export interface SimpleProperty {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  city: string;
+  neighborhood?: string;
+  area: number;
+  rooms: number;
+  bathrooms: number;
+  price: number;
+  category: string;
+  featured: boolean;
+  seller: string;
+  rating: number;
+  inquiries: number;
+  media?: Array<{ id: string; url: string; type: string; publicId: string }>;
+}
+
+export function PropertyExplorer({
+  locale,
+  properties,
+  cities,
+  categories,
+  title,
+  subtitle,
+  noResults,
+  currentPage,
+  totalPages,
+}: {
+  locale: Locale;
+  properties: SimpleProperty[];
+  cities: string[];
+  categories: Array<{ id: string; name: string; slug: string | null }>;
+  title: string;
+  subtitle: string;
+  noResults: string;
+  currentPage: number;
+  totalPages: number;
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initializedRef = useRef(false);
+
+  const [activeFilters, setActiveFilters] = useState({
+    query: "",
+    city: "all",
+    neighborhood: "all",
+    rooms: "all",
+    category: "all",
+    maxPrice: "",
+  });
+
+  const [pendingFilters, setPendingFilters] = useState(activeFilters);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const urlQuery = searchParams.get("query") || "";
+    const urlCity = searchParams.get("city") || "all";
+    const urlNeighborhood = searchParams.get("neighborhood") || "all";
+    const urlRooms = searchParams.get("rooms") || "all";
+    const urlCategory = searchParams.get("category") || "all";
+    const urlMaxPrice = searchParams.get("maxPrice") || "";
+
+    const filters = {
+      query: urlQuery,
+      city: urlCity,
+      neighborhood: urlNeighborhood,
+      rooms: urlRooms,
+      category: urlCategory,
+      maxPrice: urlMaxPrice,
+    };
+
+    if (!initializedRef.current) {
+      setActiveFilters(filters);
+      setPendingFilters(filters);
+      initializedRef.current = true;
+      return;
+    }
+
+    setActiveFilters(filters);
+    setPendingFilters(filters);
+  }, [searchParams]);
+
+  const setPageParam = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(page));
+    }
+    router.push(params.toString() ? `?${params.toString()}` : "?");
+  };
+
+  const applyFilters = async () => {
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const params = new URLSearchParams();
+      if (pendingFilters.query) params.set("query", pendingFilters.query);
+      if (pendingFilters.city !== "all")
+        params.set("city", pendingFilters.city);
+      if (pendingFilters.neighborhood !== "all") {
+        params.set("neighborhood", pendingFilters.neighborhood);
+      }
+      if (pendingFilters.rooms !== "all")
+        params.set("rooms", pendingFilters.rooms);
+      if (pendingFilters.category !== "all")
+        params.set("category", pendingFilters.category);
+      if (pendingFilters.maxPrice)
+        params.set("maxPrice", pendingFilters.maxPrice);
+      params.set("page", "1");
+
+      router.push(`?${params.toString()}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const reset = () => {
+    const emptyFilters = {
+      query: "",
+      city: "all",
+      neighborhood: "all",
+      rooms: "all",
+      category: "all",
+      maxPrice: "",
+    };
+    setActiveFilters(emptyFilters);
+    setPendingFilters(emptyFilters);
+    router.push("?");
+  };
+
+  const neighborhoods = [
+    "all",
+    ...new Set(
+      properties
+        .filter((p) => p.neighborhood)
+        .map((property) => property.neighborhood),
+    ),
+  ];
+
+  return (
+    <div className="space-y-8">
+      <Card className="border-border/70 bg-card/95 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl">{title}</CardTitle>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="xl:col-span-2">
+            <label className="mb-2 block text-sm font-medium">
+              {t(locale, { en: "Search", ar: "ابحث", fr: "Recherche" })}
+            </label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground rtl:left-auto rtl:right-4" />
+              <Input
+                value={pendingFilters.query}
+                onChange={(event) =>
+                  setPendingFilters((prev) => ({
+                    ...prev,
+                    query: event.target.value,
+                  }))
+                }
+                placeholder={t(locale, {
+                  en: "City, home, or seller",
+                  ar: "مدينة أو عقار أو بائع",
+                  fr: "Ville, logement ou vendeur",
+                })}
+                className="pl-11 rtl:pr-11 rtl:pl-4"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              {t(locale, { en: "City", ar: "المدينة", fr: "Ville" })}
+            </label>
+            <Select
+              value={pendingFilters.city}
+              onChange={(event) =>
+                setPendingFilters((prev) => ({
+                  ...prev,
+                  city: event.target.value,
+                }))
+              }
+            >
+              <option value="all">
+                {t(locale, { en: "All", ar: "الكل", fr: "Tous" })}
+              </option>
+              {cities.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              {t(locale, { en: "Neighborhood", ar: "الحي", fr: "Quartier" })}
+            </label>
+            <Select
+              value={pendingFilters.neighborhood}
+              onChange={(event) =>
+                setPendingFilters((prev) => ({
+                  ...prev,
+                  neighborhood: event.target.value,
+                }))
+              }
+            >
+              {neighborhoods.map((item) => (
+                <option key={item || "all"} value={item || "all"}>
+                  {item === "all" || !item
+                    ? t(locale, { en: "All", ar: "الكل", fr: "Tous" })
+                    : item}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              {t(locale, { en: "Rooms", ar: "عدد الغرف", fr: "Chambres" })}
+            </label>
+            <Select
+              value={pendingFilters.rooms}
+              onChange={(event) =>
+                setPendingFilters((prev) => ({
+                  ...prev,
+                  rooms: event.target.value,
+                }))
+              }
+            >
+              <option value="all">
+                {t(locale, { en: "All", ar: "الكل", fr: "Tous" })}
+              </option>
+              {[1, 2, 3, 4, 5].map((room) => (
+                <option key={room} value={room}>
+                  {room}+
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              {t(locale, { en: "Category", ar: "النوع", fr: "Categorie" })}
+            </label>
+            <Select
+              value={pendingFilters.category}
+              onChange={(event) =>
+                setPendingFilters((prev) => ({
+                  ...prev,
+                  category: event.target.value,
+                }))
+              }
+            >
+              <option value="all">
+                {t(locale, { en: "All", ar: "الكل", fr: "Tous" })}
+              </option>
+              {categories.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              {t(locale, {
+                en: "Max price",
+                ar: "أعلى سعر",
+                fr: "Prix maximum",
+              })}
+            </label>
+            <Input
+              value={pendingFilters.maxPrice}
+              onChange={(event) =>
+                setPendingFilters((prev) => ({
+                  ...prev,
+                  maxPrice: event.target.value,
+                }))
+              }
+              inputMode="numeric"
+            />
+          </div>
+        </CardContent>
+        <div className="flex flex-wrap items-center gap-3 px-6 pb-6">
+          <Button
+            type="button"
+            variant="accent"
+            onClick={applyFilters}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t(locale, {
+                  en: "Loading...",
+                  ar: "جاري التحميل...",
+                  fr: "Chargement...",
+                })}
+              </>
+            ) : (
+              t(locale, {
+                en: "Apply filters",
+                ar: "تطبيق الفلاتر",
+                fr: "Appliquer",
+              })
+            )}
+          </Button>
+          <Button type="button" variant="outline" onClick={reset}>
+            {t(locale, {
+              en: "Clear filters",
+              ar: "مسح الفلاتر",
+              fr: "Effacer",
+            })}
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {properties.length}{" "}
+            {t(locale, { en: "results", ar: "نتيجة", fr: "resultats" })}
+          </span>
+        </div>
+      </Card>
+
+      <div className="space-y-6">
+        {properties.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {properties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                locale={locale}
+                property={property}
+              />
+            ))}
+          </div>
+        ) : (
+          <Card className="border-dashed">
+            <CardContent className="flex min-h-64 items-center justify-center text-center text-muted-foreground">
+              {noResults}
+            </CardContent>
+          </Card>
+        )}
+
+        {properties.length > 0 && totalPages > 1 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/70 px-4 py-3">
+            <div className="text-sm text-muted-foreground">
+              {t(locale, { en: "Page", ar: "الصفحة", fr: "Page" })}{" "}
+              {currentPage} / {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPageParam(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              >
+                {t(locale, { en: "Previous", ar: "السابق", fr: "Precedent" })}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPageParam(Math.min(totalPages, currentPage + 1))
+                }
+                disabled={currentPage === totalPages}
+              >
+                {t(locale, { en: "Next", ar: "التالي", fr: "Suivant" })}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}

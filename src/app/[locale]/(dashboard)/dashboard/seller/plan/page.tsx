@@ -1,8 +1,12 @@
 import { Check, Crown } from "lucide-react";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { getMessages } from "@/lib/messages";
-import { plans } from "@/lib/site-data";
+import { plans as planFeatures } from "@/lib/site-data";
+import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/locales";
 
 export default async function SellerPlanPage({
@@ -12,6 +16,28 @@ export default async function SellerPlanPage({
 }) {
   const { locale } = await params;
   const messages = getMessages(locale);
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect(`/${locale}/login`);
+  }
+
+  if (session.user.role !== "SELLER") {
+    redirect(`/${locale}/dashboard/profile`);
+  }
+
+  const seller = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { planId: true },
+  });
+
+  const currentPlanId = seller?.planId ?? session.user.planId ?? "free";
+
+  const plans = await prisma.plan.findMany({
+    orderBy: { price: "asc" },
+  });
+
+  const currentPlan = plans.find((plan) => plan.id === currentPlanId) ?? null;
 
   return (
     <div className="space-y-6">
@@ -25,53 +51,107 @@ export default async function SellerPlanPage({
             : "Choose the right plan for your listing volume."}
         </p>
       </div>
+
+      {currentPlan ? (
+        <Card className="border-emerald-500/30 bg-emerald-500/5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <div>
+              <div className="text-sm text-muted-foreground">
+                {locale === "ar" ? "الباقة الحالية" : "Current plan"}
+              </div>
+              <div className="text-xl font-semibold">
+                {locale === "ar"
+                  ? currentPlan.title_ar || currentPlan.title
+                  : locale === "fr"
+                    ? currentPlan.title_fr || currentPlan.title
+                    : currentPlan.title}
+              </div>
+            </div>
+            <Badge variant="secondary" className="border-emerald-600/30">
+              {locale === "ar" ? "نشطة" : "Active"}
+            </Badge>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-3">
-        {plans.map((plan) => (
-          <Card
-            key={plan.id}
-            className={
-              plan.featured
-                ? "border-violet-500/30 bg-violet-500/5"
-                : "border-border/70"
-            }
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {plan.featured ? (
-                  <Crown className="h-4 w-4 text-violet-500" />
-                ) : null}
-                {plan.title[locale]}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-4xl font-semibold">
-                {plan.price === 0
-                  ? locale === "ar"
-                    ? "مجاني"
-                    : "Free"
-                  : `$${plan.price}`}
-              </div>
-              <div className="space-y-3">
-                {plan.features.map((feature, index) => (
-                  <div
-                    key={`${plan.id}-feature-${index}`}
-                    className="flex items-center gap-3 text-sm text-muted-foreground"
+        {plans.map((plan) => {
+          const featureSet = planFeatures.find((item) => item.id === plan.id);
+          const isCurrentPlan = plan.id === currentPlanId;
+
+          return (
+            <Card
+              key={plan.id}
+              className={
+                isCurrentPlan
+                  ? "border-emerald-500/40 bg-emerald-500/5"
+                  : plan.featured
+                    ? "border-violet-500/30 bg-violet-500/5"
+                    : "border-border/70"
+              }
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  {plan.featured ? (
+                    <Crown className="h-4 w-4 text-violet-500" />
+                  ) : null}
+                  {locale === "ar"
+                    ? plan.title_ar || plan.title
+                    : locale === "fr"
+                      ? plan.title_fr || plan.title
+                      : plan.title}
+                </CardTitle>
+                {isCurrentPlan ? (
+                  <Badge
+                    variant="secondary"
+                    className="w-fit border-emerald-600/30"
                   >
-                    <Check className="h-4 w-4 text-violet-500" />
-                    {feature[locale]}
-                  </div>
-                ))}
-              </div>
-              <ButtonLink
-                href={`/${locale}/pricing`}
-                variant={plan.featured ? "accent" : "outline"}
-                className="w-full"
-              >
-                {locale === "ar" ? "عرض الباقات" : "View plans"}
-              </ButtonLink>
-            </CardContent>
-          </Card>
-        ))}
+                    {locale === "ar" ? "الباقة الحالية" : "Current plan"}
+                  </Badge>
+                ) : null}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-4xl font-semibold">
+                  {plan.price === 0
+                    ? locale === "ar"
+                      ? "مجاني"
+                      : "Free"
+                    : `$${plan.price}`}
+                </div>
+                <div className="space-y-3">
+                  {(featureSet?.features ?? []).map((feature, index) => (
+                    <div
+                      key={`${plan.id}-feature-${index}`}
+                      className="flex items-center gap-3 text-sm text-muted-foreground"
+                    >
+                      <Check className="h-4 w-4 text-violet-500" />
+                      {feature[locale]}
+                    </div>
+                  ))}
+                </div>
+                <ButtonLink
+                  href={`/${locale}/pricing`}
+                  variant={
+                    isCurrentPlan
+                      ? "default"
+                      : plan.featured
+                        ? "accent"
+                        : "outline"
+                  }
+                  className="w-full"
+                >
+                  {isCurrentPlan
+                    ? locale === "ar"
+                      ? "باقتك الحالية"
+                      : "Your current plan"
+                    : locale === "ar"
+                      ? "عرض الباقات"
+                      : "View plans"}
+                </ButtonLink>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

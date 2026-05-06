@@ -1,6 +1,7 @@
-import { ListingForm } from "@/components/listing-form";
+import { ListingForm } from "@/components/property/listing-form";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
+import { prisma } from "@/lib/prisma";
 
 export default async function SellerAddPage({
   params,
@@ -9,6 +10,22 @@ export default async function SellerAddPage({
 }) {
   const { locale } = await params;
   const messages = getMessages(locale);
+
+  const [categories, cities] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+    prisma.property.findMany({
+      distinct: ["city"],
+      select: { city: true },
+      orderBy: { city: "asc" },
+    }),
+  ]);
+
+  const uniqueCities = Array.from(
+    new Map(cities.map((item) => [item.city, item])).values(),
+  ).map((item) => item.city);
 
   return (
     <div className="space-y-6">
@@ -22,7 +39,12 @@ export default async function SellerAddPage({
             : "Create a new listing with photos, amenities, and plan-aware limits."}
         </p>
       </div>
-      <ListingForm locale={locale} title={messages.dashboard.seller.addHouse} />
+      <ListingForm
+        locale={locale}
+        title={messages.dashboard.seller.addHouse}
+        categories={categories}
+        cities={uniqueCities}
+      />
     </div>
   );
 }

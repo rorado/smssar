@@ -51,9 +51,12 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  City: 'City',
   Category: 'Category',
+  Plan: 'Plan',
   User: 'User',
-  Property: 'Property'
+  Property: 'Property',
+  Media: 'Media'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -72,9 +75,26 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const CityScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  name_en: 'name_en',
+  name_ar: 'name_ar',
+  name_fr: 'name_fr',
+  slug: 'slug',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CityScalarFieldEnum = (typeof CityScalarFieldEnum)[keyof typeof CityScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  name_en: 'name_en',
+  name_ar: 'name_ar',
+  name_fr: 'name_fr',
   slug: 'slug',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -83,11 +103,33 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const PlanScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  title_ar: 'title_ar',
+  title_fr: 'title_fr',
+  description: 'description',
+  description_ar: 'description_ar',
+  description_fr: 'description_fr',
+  price: 'price',
+  listings: 'listings',
+  featured: 'featured',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
+  phone: 'phone',
+  city: 'city',
+  bio: 'bio',
+  planId: 'planId',
   role: 'role',
   status: 'status',
   createdAt: 'createdAt',
@@ -102,19 +144,35 @@ export const PropertyScalarFieldEnum = {
   title: 'title',
   description: 'description',
   city: 'city',
+  neighborhood: 'neighborhood',
   area: 'area',
   rooms: 'rooms',
   bathrooms: 'bathrooms',
   price: 'price',
   categoryId: 'categoryId',
   featured: 'featured',
+  priceType: 'priceType',
   imageUrl: 'imageUrl',
+  vedioUrl: 'vedioUrl',
   sellerId: 'sellerId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
+
+
+export const MediaScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  publicId: 'publicId',
+  type: 'type',
+  propertyId: 'propertyId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MediaScalarFieldEnum = (typeof MediaScalarFieldEnum)[keyof typeof MediaScalarFieldEnum]
 
 
 export const SortOrder = {

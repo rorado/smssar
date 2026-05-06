@@ -1,6 +1,8 @@
-import type { Locale } from "@/lib/locales";
-
-export type LocalizedText = Record<Locale, string>;
+export type LocalizedText = {
+  en: string;
+  ar: string;
+  fr?: string;
+};
 
 export interface Property {
   id: string;
@@ -8,10 +10,12 @@ export interface Property {
   description: LocalizedText;
   imageUrl?: string;
   city: LocalizedText;
+  neighborhood?: string;
   area: number;
   rooms: number;
   bathrooms: number;
   price: number;
+  priceType?: "MONTHLY" | "DAILY";
   category: string;
   featured: boolean;
   seller: string;
@@ -424,8 +428,29 @@ export const sellerStats = [
 ] as const;
 
 export const adminStats = [
-  { label: { en: "Total users", ar: "إجمالي المستخدمين" }, value: 5421 },
-  { label: { en: "Active listings", ar: "العقارات النشطة" }, value: 1280 },
-  { label: { en: "Pending reviews", ar: "المراجعات المعلقة" }, value: 31 },
-  { label: { en: "Revenue", ar: "الإيرادات" }, value: 146000 },
+  {
+    label: {
+      en: "Total users",
+      ar: "إجمالي المستخدمين",
+      fr: "Utilisateurs totaux",
+    },
+    value: 5421,
+  },
+  {
+    label: {
+      en: "Active listings",
+      ar: "العقارات النشطة",
+      fr: "Annonces actives",
+    },
+    value: 1280,
+  },
+  {
+    label: {
+      en: "Pending reviews",
+      ar: "المراجعات المعلقة",
+      fr: "Avis en attente",
+    },
+    value: 31,
+  },
+  { label: { en: "Revenue", ar: "الإيرادات", fr: "Revenu" }, value: 146000 },
 ] as const;

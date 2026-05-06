@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatGrid } from "@/components/stat-grid";
+import { StatGrid } from "@/components/dashboard/stat-grid";
 import { adminStats, users, properties } from "@/lib/site-data";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";

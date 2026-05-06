@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Mail, Lock } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -7,12 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
-import { loginAction } from "./actions";
-import { LoginSubmitButton } from "./login-submit-button";
+import { LoginFormClient } from "./login-form-client";
 
 export default async function LoginPage({
   params,
@@ -55,67 +51,11 @@ export default async function LoginPage({
           <CardDescription>{messages.auth.loginDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          {errorText ? (
-            <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
-              {errorText}
-            </div>
-          ) : null}
-          <form
-            action={async (formData) => {
-              "use server";
-              await loginAction(formData, locale);
-            }}
-            className="space-y-5"
-          >
-            <div className="space-y-2">
-              <Label htmlFor="email">{messages.auth.email}</Label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground rtl:left-auto rtl:right-4" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  className="pl-11 rtl:pr-11 rtl:pl-4"
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">{messages.auth.password}</Label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground rtl:left-auto rtl:right-4" />
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  className="pl-11 rtl:pr-11 rtl:pl-4"
-                  required
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-border"
-                />
-                {messages.auth.rememberMe}
-              </label>
-              <Link
-                href={`/${locale}/forgot-password`}
-                className="font-medium text-violet-600 hover:underline dark:text-violet-300"
-              >
-                {messages.auth.forgotTitle}
-              </Link>
-            </div>
-            <LoginSubmitButton
-              label={messages.nav.login}
-              loadingLabel={
-                locale === "ar" ? "جاري تسجيل الدخول..." : "Signing in..."
-              }
-            />
-          </form>
+          <LoginFormClient
+            locale={locale}
+            messages={messages}
+            initialErrorText={errorText}
+          />
           <p className="text-center text-sm text-muted-foreground">
             {messages.auth.noAccount}{" "}
             <Link

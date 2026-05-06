@@ -1,24 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/navigation/theme-toggle";
 import { getDirection, isLocale, type Locale } from "@/lib/locales";
 import type { ReactNode } from "react";
 import "./globals.css";
-
-const themeScript = `(() => {
-  try {
-    const storageKey = "theme";
-    const stored = localStorage.getItem(storageKey);
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const theme = stored === "dark" || stored === "light" ? stored : (prefersDark ? "dark" : "light");
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  } catch {}
-})();`;
+import { Providers } from "../components/providers";
 
 export const metadata: Metadata = {
   title: {
@@ -47,12 +33,12 @@ export default async function RootLayout({
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+      <head />
       <body className="min-h-screen bg-background text-foreground antialiased transition-colors duration-200">
-        <ThemeToggle initialLocale={locale} />
-        {children}
+        <Providers>
+          <ThemeToggle initialLocale={locale} />
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { LanguageSwitcher } from "@/components/navigation/language-switcher";
 import type { Locale } from "@/lib/locales";
 import Link from "next/link";
 

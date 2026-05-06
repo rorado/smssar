@@ -42,16 +42,25 @@ export async function POST(request: Request) {
   const passwordHash = await hash(password, 12);
 
   try {
+    const defaultPlan = await prisma.plan.findFirst({
+      orderBy: { price: "asc" },
+    });
+    if (!defaultPlan) {
+      return jsonError("No plans available. Ask an admin to create one.", 400);
+    }
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
         passwordHash,
+        planId: defaultPlan.id,
         role,
       },
       select: {
         id: true,
         role: true,
+        planId: true,
       },
     });
 

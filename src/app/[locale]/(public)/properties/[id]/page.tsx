@@ -6,9 +6,11 @@ import {
   BedDouble,
   Heart,
   MapPin,
+  Phone,
   Ruler,
   ShieldCheck,
   Star,
+  UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -16,8 +18,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
 import { getMessages } from "@/lib/messages";
 import { properties } from "@/lib/site-data";
+import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/locales";
+import type { Property } from "@/lib/site-data";
 import type { ReactNode } from "react";
+import MediaSwiper from "@/components/media/media-swiper-client";
+
+type PropertyDisplay = Property & {
+  sellerId?: string;
+  sellerPhone?: string | null;
+  sellerBio?: string | null;
+  sellerCity?: string | null;
+  media?: Array<{
+    id: string;
+    url: string;
+    resourceType: "image" | "video";
+  }>;
+};
 
 export default async function PropertyDetailPage({
   params,
@@ -26,7 +43,80 @@ export default async function PropertyDetailPage({
 }) {
   const { locale, id } = await params;
   const messages = getMessages(locale);
-  const property = properties.find((item) => item.id === id);
+
+  // Try to find property in mock data first
+  let property: PropertyDisplay | undefined = properties.find(
+    (item) => item.id === id,
+  );
+
+  // If not found in mock data, fetch from database
+  if (!property) {
+    const dbProperty = await prisma.property.findUnique({
+      where: { id },
+      include: {
+        category: {
+          select: { id: true, name: true, slug: true },
+        },
+        seller: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            city: true,
+            bio: true,
+          },
+        },
+        media: {
+          select: { url: true, type: true },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    if (!dbProperty) {
+      notFound();
+    }
+
+    // Convert database property to display format
+    property = {
+      id: dbProperty.id,
+      title: {
+        en: dbProperty.title,
+        ar: dbProperty.title,
+        fr: dbProperty.title,
+      },
+      description: {
+        en: dbProperty.description || "",
+        ar: dbProperty.description || "",
+        fr: dbProperty.description || "",
+      },
+      imageUrl: dbProperty.imageUrl ?? undefined,
+      city: { en: dbProperty.city, ar: dbProperty.city, fr: dbProperty.city },
+      area: dbProperty.area ?? 0,
+      rooms: dbProperty.rooms,
+      bathrooms: dbProperty.bathrooms ?? 0,
+      price: dbProperty.price,
+      category: dbProperty.category?.name || "villas",
+      featured: dbProperty.featured,
+      seller: dbProperty.seller?.name || "Seller",
+      sellerId: dbProperty.seller?.id,
+      sellerPhone: dbProperty.seller?.phone ?? null,
+      sellerBio: dbProperty.seller?.bio ?? null,
+      sellerCity: dbProperty.seller?.city ?? null,
+      rating: 4.8,
+      inquiries: 0,
+      palette: ["from-blue-500", "to-indigo-600"] as [string, string],
+      amenities: [],
+      // include media for client swiper
+      media:
+        dbProperty.media?.map((m) => ({
+          id: `${dbProperty.id}-${m.url}`,
+          url: m.url,
+          resourceType: m.type as "image" | "video",
+        })) ?? [],
+    };
+  }
 
   if (!property) {
     notFound();
@@ -43,24 +133,43 @@ export default async function PropertyDetailPage({
       </Link>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-        <Card className="overflow-hidden border-border/70">
-          <div
-            className={`relative h-80 bg-linear-to-br ${property.palette[0]} ${property.palette[1]}`}
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_33%),linear-gradient(180deg,rgba(15,23,42,0.06),rgba(15,23,42,0.5))]" />
-            <div className="absolute bottom-6 left-6 right-6 text-white">
-              <div className="flex flex-wrap gap-2">
+        <Card className="overflow-hidden border-border/70 p-4">
+          <div>
+            <div className="relative ">
+              {/* Hydrate client-side media swiper */}
+              {/* prepare media array for the client swiper */}
+              {(() => {
+                const mediaForSwiper = property.media?.length
+                  ? property.media
+                  : property.imageUrl
+                    ? [
+                        {
+                          id: `${property.id}-cover`,
+                          url: property.imageUrl,
+                          resourceType: "image" as const,
+                        },
+                      ]
+                    : [];
+
+                return <MediaSwiper media={mediaForSwiper} />;
+              })()}
+            </div>
+            <div className="mt-4">
+              <div className="flex flex-wrap gap-2 items-center">
                 {property.featured ? (
                   <Badge variant="accent">Featured</Badge>
                 ) : null}
-                <Badge variant="secondary" className="bg-white/15 text-white">
+                <Badge
+                  variant="secondary"
+                  className="bg-white/15 text-muted-foreground"
+                >
                   {property.city[locale]}
                 </Badge>
               </div>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-balance">
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground">
                 {property.title[locale]}
               </h1>
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-white/85">
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-muted-foreground">
                 <span className="inline-flex items-center gap-2">
                   <MapPin className="h-4 w-4" /> {property.city[locale]}
                 </span>
@@ -131,11 +240,50 @@ export default async function PropertyDetailPage({
                   {property.seller}
                 </div>
               </div>
+              {property.sellerCity ? (
+                <div className="text-sm text-muted-foreground">
+                  {locale === "ar" ? "المدينة" : "City"}: {property.sellerCity}
+                </div>
+              ) : null}
+              {property.sellerPhone ? (
+                <a
+                  href={`tel:${property.sellerPhone}`}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-violet-500"
+                >
+                  <Phone className="h-4 w-4" />
+                  {property.sellerPhone}
+                </a>
+              ) : null}
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-emerald-500" />
                 {locale === "ar"
                   ? "بائع موثق مع استجابة سريعة"
                   : "Verified seller with fast response"}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {property.sellerId ? (
+                  <ButtonLink
+                    href={`/${locale}/sellers/${property.sellerId}`}
+                    target="_blank"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <UserRound className="h-4 w-4" />
+                    {locale === "ar"
+                      ? "زيارة ملف البائع"
+                      : "Visit seller profile"}
+                  </ButtonLink>
+                ) : null}
+                {property.sellerPhone ? (
+                  <ButtonLink
+                    href={`tel:${property.sellerPhone}`}
+                    variant="accent"
+                    className="w-full"
+                  >
+                    <Phone className="h-4 w-4" />
+                    {locale === "ar" ? "اتصل بالبائع" : "Call seller"}
+                  </ButtonLink>
+                ) : null}
               </div>
               <ButtonLink
                 href={`/${locale}/login`}
@@ -159,7 +307,10 @@ export default async function PropertyDetailPage({
               />
               <InfoRow
                 label={messages.properties.location}
-                value={property.city[locale]}
+                value={
+                  (property.city[locale as keyof typeof property.city] ??
+                    property.city.en) as string
+                }
               />
               <InfoRow
                 label={messages.common.inquiries}

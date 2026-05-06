@@ -1,16 +1,109 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { properties } from "@/lib/site-data";
+import { AdminListingsPanel } from "@/components/admin/admin-listings-panel";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
+import { prisma } from "@/lib/prisma";
+
+function toPositiveInteger(
+  value: string | null | undefined,
+  defaultValue: number,
+): number {
+  if (!value) return defaultValue;
+  const num = parseInt(value, 10);
+  return num > 0 ? num : defaultValue;
+}
 
 export default async function AdminListingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   const messages = getMessages(locale);
+
+  function getValidPageSize(value: string | null | undefined): number {
+    const parsed = parseInt(value || "", 10);
+    if (Number.isFinite(parsed) && parsed >= 5 && parsed <= 100) {
+      return parsed;
+    }
+    return 10; // default
+  }
+
+  const PAGE_SIZE = getValidPageSize(resolvedSearchParams.pageSize as string);
+  const currentPage = toPositiveInteger(resolvedSearchParams.page as string, 1);
+  const search = (resolvedSearchParams.search as string) ?? "";
+
+  let listings = [];
+  let categories = [];
+  let cities: string[] = [];
+  let totalCount = 0;
+
+  try {
+    const q = search.trim().toLowerCase();
+    const where = q
+      ? {
+          OR: [{ title: { contains: search, mode: "insensitive" as const } }],
+        }
+      : {};
+
+    const [countResult, listingsResult, categoriesResult, citiesResult] =
+      await Promise.all([
+        prisma.property.count({ where }),
+        prisma.property.findMany({
+          where,
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            city: true,
+            neighborhood: true,
+            area: true,
+            rooms: true,
+            bathrooms: true,
+            price: true,
+            categoryId: true,
+            featured: true,
+            imageUrl: true,
+            createdAt: true,
+            category: {
+              select: { id: true, name: true, slug: true },
+            },
+            seller: {
+              select: { id: true, name: true, email: true },
+            },
+            media: {
+              select: { id: true, url: true, type: true, publicId: true },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+          take: PAGE_SIZE,
+          skip: (currentPage - 1) * PAGE_SIZE,
+        }),
+        prisma.category.findMany({
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+        prisma.property.findMany({
+          distinct: ["city"],
+          select: { city: true },
+          orderBy: { city: "asc" },
+        }),
+      ]);
+
+    totalCount = countResult;
+    listings = listingsResult;
+    categories = categoriesResult;
+    cities = Array.from(
+      new Map(citiesResult.map((item) => [item.city, item])).values(),
+    ).map((item) => item.city);
+  } catch (err) {
+    console.error("Prisma query failed in AdminListingsPage:", err);
+    throw err;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
@@ -24,26 +117,14 @@ export default async function AdminListingsPage({
             : "Review listings, approve them, or flag issues."}
         </p>
       </div>
-      <div className="grid gap-6 xl:grid-cols-2">
-        {properties.map((property) => (
-          <Card key={property.id}>
-            <CardHeader className="flex flex-row items-start justify-between gap-4">
-              <div>
-                <CardTitle>{property.title[locale]}</CardTitle>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {property.city[locale]}
-                </p>
-              </div>
-              <Badge variant={property.featured ? "accent" : "secondary"}>
-                {property.featured ? "Featured" : "Standard"}
-              </Badge>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              {property.description[locale]}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <AdminListingsPanel
+        locale={locale}
+        initialListings={listings}
+        categories={categories}
+        cities={cities}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
     </div>
   );
 }

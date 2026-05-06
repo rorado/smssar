@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteNavbar } from "@/components/site-navbar";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteNavbar } from "@/components/layout/site-navbar";
 
 export default async function PublicLayout({
   children,

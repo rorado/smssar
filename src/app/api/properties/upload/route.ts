@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { type UploadApiResponse } from "cloudinary";
 import cloudinary from "@/lib/cloudinary";
 import { auth } from "@/auth";
 
@@ -6,12 +7,16 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user?.id || session.user.role !== "SELLER") {
+  if (
+    !session?.user?.id ||
+    (session.user.role !== "SELLER" && session.user.role !== "ADMIN")
+  ) {
     return NextResponse.json(
-      { error: "Only sellers can upload files." },
+      { error: "Only admins and sellers can upload files." },
       { status: 403 },
     );
   }
+  const propertyUploadsFolder = `kirae/properties/${session.user.email || session.user.id}`;
 
   const formData = await request.formData();
   const file = formData.get("file");
@@ -24,18 +29,64 @@ export async function POST(request: Request) {
   const buffer = Buffer.from(arrayBuffer);
 
   try {
-    const upload = await new Promise((resolve, reject) => {
+    const upload = await new Promise<UploadApiResponse>((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({ resource_type: "auto" }, (err, result) => {
-          if (err || !result) return reject(err || new Error("Upload failed"));
-          resolve(result);
-        })
+        .upload_stream(
+          { resource_type: "auto", folder: propertyUploadsFolder },
+          (err, result) => {
+            if (err || !result)
+              return reject(err || new Error("Upload failed"));
+            resolve(result);
+          },
+        )
         .end(buffer);
     });
-    return NextResponse.json({ url: (upload as any).secure_url });
-  } catch (error) {
+    return NextResponse.json({
+      url: upload.secure_url,
+      publicId: upload.public_id,
+      resourceType: upload.resource_type,
+    });
+  } catch {
     return NextResponse.json(
       { error: "Cloudinary upload failed." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  const session = await auth();
+  if (
+    !session?.user?.id ||
+    (session.user.role !== "SELLER" && session.user.role !== "ADMIN")
+  ) {
+    return NextResponse.json(
+      { error: "Only admins and sellers can delete files." },
+      { status: 403 },
+    );
+  }
+
+  const body = (await request.json().catch(() => null)) as {
+    publicId?: string;
+    resourceType?: "image" | "video" | "raw";
+  } | null;
+
+  if (!body?.publicId) {
+    return NextResponse.json(
+      { error: "publicId is required." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    await cloudinary.uploader.destroy(body.publicId, {
+      resource_type: body.resourceType ?? "image",
+    });
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Cloudinary delete failed." },
       { status: 500 },
     );
   }

@@ -1,11 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SellerProfilePanel } from "@/components/seller/seller-profile-panel";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
-import type { ReactNode } from "react";
 
 export default async function SellerProfilePage({
   params,
@@ -15,12 +12,27 @@ export default async function SellerProfilePage({
   const { locale } = await params;
   const messages = getMessages(locale);
   const session = await auth();
-  
-  const profileName =
-    session?.user?.name?.trim() || (locale === "ar" ? "مستخدم" : "User");
-  const profileEmail =
-    session?.user?.email?.trim() ||
-    (locale === "ar" ? "لا يوجد بريد إلكتروني" : "No email available");
+
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  const sellerRecord = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      city: true,
+      bio: true,
+      createdAt: true,
+    },
+  });
+
+  if (!sellerRecord) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
@@ -34,48 +46,7 @@ export default async function SellerProfilePage({
             : "Update seller profile and public contact details."}
         </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>{messages.dashboard.seller.profile}</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-5 md:grid-cols-2">
-          <Field label={messages.auth.fullName}>
-            <Input defaultValue={profileName} />
-          </Field>
-          <Field label={messages.auth.email}>
-            <Input defaultValue={profileEmail} />
-          </Field>
-          <Field label={locale === "ar" ? "رقم الهاتف" : "Phone"}>
-            <Input defaultValue="+971 50 000 0000" />
-          </Field>
-          <Field label={locale === "ar" ? "نبذة" : "Bio"} full>
-            <Textarea
-              defaultValue={
-                locale === "ar"
-                  ? "بائع موثق للعقارات السكنية المميزة."
-                  : "Verified seller specializing in premium rental homes."
-              }
-            />
-          </Field>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  children,
-  full = false,
-}: {
-  label: string;
-  children: ReactNode;
-  full?: boolean;
-}) {
-  return (
-    <div className={full ? "space-y-2 md:col-span-2" : "space-y-2"}>
-      <Label>{label}</Label>
-      {children}
+      <SellerProfilePanel locale={locale} initialSeller={sellerRecord} />
     </div>
   );
 }

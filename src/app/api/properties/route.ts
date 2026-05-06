@@ -3,12 +3,11 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { jsonError, readJson } from "@/lib/api-utils";
 
-export const runtime = "nodejs";
-
 type CreatePropertyBody = {
   title?: string;
   description?: string;
   city?: string;
+  neighborhood?: string;
   area?: number;
   rooms?: number;
   bathrooms?: number;
@@ -16,6 +15,8 @@ type CreatePropertyBody = {
   categoryId?: string;
   featured?: boolean;
   imageUrl?: string | null;
+  images?: Array<{ url: string; publicId: string; type: string }>;
+  priceType?: string;
 };
 
 export async function GET() {
@@ -45,6 +46,28 @@ export async function POST(request: Request) {
     return jsonError("Only sellers can create properties.", 403);
   }
 
+  // Check plan listing limits
+  const userPlan = await prisma.plan.findUnique({
+    where: { id: session.user.planId },
+  });
+
+  if (!userPlan) {
+    return jsonError("User plan not found.", 500);
+  }
+
+  const planLimit = userPlan.listings ?? Infinity;
+
+  const existingCount = await prisma.property.count({
+    where: { sellerId: session.user.id },
+  });
+
+  if (existingCount >= planLimit) {
+    return jsonError(
+      `Your ${userPlan.id} plan allows up to ${planLimit === Infinity ? "unlimited" : planLimit} listings. You have reached the limit.`,
+      400,
+    );
+  }
+
   const body = await readJson<CreatePropertyBody>(request);
   if (!body) {
     return jsonError("Invalid JSON body.");
@@ -59,6 +82,26 @@ export async function POST(request: Request) {
     return jsonError("Fields 'title', 'city', and 'categoryId' are required.");
   }
 
+  // Verify category exists (Category.name is used as the FK)
+  const categoryExists = await prisma.category.findUnique({
+    where: { name: categoryId },
+    select: { name: true },
+  });
+
+  if (!categoryExists) {
+    return jsonError(`Invalid categoryId: ${categoryId}`, 400);
+  }
+
+  // Verify seller exists
+  const sellerExists = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+
+  if (!sellerExists) {
+    return jsonError(`Invalid sellerId: ${session.user.id}`, 400);
+  }
+
   if (
     typeof body.area !== "number" ||
     typeof body.rooms !== "number" ||
@@ -71,11 +114,18 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Use first uploaded image as main image (if provided)
+    const imageUrlFromBody =
+      body.images && body.images.length > 0
+        ? body.images[0].url
+        : (body.imageUrl ?? null);
+
     const property = await prisma.property.create({
       data: {
         title,
         description,
         city,
+        neighborhood: body.neighborhood?.trim() || null,
         area: body.area,
         rooms: body.rooms,
         bathrooms: body.bathrooms,
@@ -83,7 +133,8 @@ export async function POST(request: Request) {
         categoryId,
         sellerId: session.user.id,
         featured: body.featured ?? false,
-        imageUrl: body.imageUrl ?? null,
+        imageUrl: imageUrlFromBody,
+        priceType: body.priceType ?? "MONTHLY",
       },
       include: {
         category: {
@@ -92,8 +143,47 @@ export async function POST(request: Request) {
         seller: {
           select: { id: true, name: true, email: true },
         },
+        media: {
+          select: { id: true, url: true, publicId: true, type: true },
+          orderBy: { createdAt: "asc" },
+        },
       },
     });
+
+    // Create media records if images provided
+    if (Array.isArray(body.images) && body.images.length > 0) {
+      await Promise.all(
+        body.images.map((image) =>
+          prisma.media.create({
+            data: {
+              url: image.url,
+              publicId: image.publicId,
+              type: image.type,
+              propertyId: property.id,
+            },
+          }),
+        ),
+      );
+
+      // Fetch updated property with media
+      const propertyWithMedia = await prisma.property.findUnique({
+        where: { id: property.id },
+        include: {
+          category: {
+            select: { id: true, name: true, slug: true },
+          },
+          seller: {
+            select: { id: true, name: true, email: true },
+          },
+          media: {
+            select: { id: true, url: true, publicId: true, type: true },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+      });
+
+      return NextResponse.json({ data: propertyWithMedia }, { status: 201 });
+    }
 
     return NextResponse.json({ data: property }, { status: 201 });
   } catch (error: unknown) {

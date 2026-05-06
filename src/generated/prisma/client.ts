@@ -31,8 +31,8 @@ export * from "./enums"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Categories
- * const categories = await prisma.category.findMany()
+ * // Fetch zero or more Cities
+ * const cities = await prisma.city.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -42,10 +42,20 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
+ * Model City
+ * 
+ */
+export type City = Prisma.CityModel
+/**
  * Model Category
  * 
  */
 export type Category = Prisma.CategoryModel
+/**
+ * Model Plan
+ * 
+ */
+export type Plan = Prisma.PlanModel
 /**
  * Model User
  * 
@@ -56,3 +66,8 @@ export type User = Prisma.UserModel
  * 
  */
 export type Property = Prisma.PropertyModel
+/**
+ * Model Media
+ * 
+ */
+export type Media = Prisma.MediaModel

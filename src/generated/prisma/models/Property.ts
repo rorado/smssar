@@ -45,13 +45,16 @@ export type PropertyMinAggregateOutputType = {
   title: string | null
   description: string | null
   city: string | null
+  neighborhood: string | null
   area: number | null
   rooms: number | null
   bathrooms: number | null
   price: number | null
   categoryId: string | null
   featured: boolean | null
+  priceType: string | null
   imageUrl: string | null
+  vedioUrl: string | null
   sellerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -62,13 +65,16 @@ export type PropertyMaxAggregateOutputType = {
   title: string | null
   description: string | null
   city: string | null
+  neighborhood: string | null
   area: number | null
   rooms: number | null
   bathrooms: number | null
   price: number | null
   categoryId: string | null
   featured: boolean | null
+  priceType: string | null
   imageUrl: string | null
+  vedioUrl: string | null
   sellerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -79,13 +85,16 @@ export type PropertyCountAggregateOutputType = {
   title: number
   description: number
   city: number
+  neighborhood: number
   area: number
   rooms: number
   bathrooms: number
   price: number
   categoryId: number
   featured: number
+  priceType: number
   imageUrl: number
+  vedioUrl: number
   sellerId: number
   createdAt: number
   updatedAt: number
@@ -112,13 +121,16 @@ export type PropertyMinAggregateInputType = {
   title?: true
   description?: true
   city?: true
+  neighborhood?: true
   area?: true
   rooms?: true
   bathrooms?: true
   price?: true
   categoryId?: true
   featured?: true
+  priceType?: true
   imageUrl?: true
+  vedioUrl?: true
   sellerId?: true
   createdAt?: true
   updatedAt?: true
@@ -129,13 +141,16 @@ export type PropertyMaxAggregateInputType = {
   title?: true
   description?: true
   city?: true
+  neighborhood?: true
   area?: true
   rooms?: true
   bathrooms?: true
   price?: true
   categoryId?: true
   featured?: true
+  priceType?: true
   imageUrl?: true
+  vedioUrl?: true
   sellerId?: true
   createdAt?: true
   updatedAt?: true
@@ -146,13 +161,16 @@ export type PropertyCountAggregateInputType = {
   title?: true
   description?: true
   city?: true
+  neighborhood?: true
   area?: true
   rooms?: true
   bathrooms?: true
   price?: true
   categoryId?: true
   featured?: true
+  priceType?: true
   imageUrl?: true
+  vedioUrl?: true
   sellerId?: true
   createdAt?: true
   updatedAt?: true
@@ -250,13 +268,16 @@ export type PropertyGroupByOutputType = {
   title: string
   description: string | null
   city: string
-  area: number
+  neighborhood: string | null
+  area: number | null
   rooms: number
-  bathrooms: number
+  bathrooms: number | null
   price: number
   categoryId: string
   featured: boolean
+  priceType: string
   imageUrl: string | null
+  vedioUrl: string | null
   sellerId: string
   createdAt: Date
   updatedAt: Date
@@ -290,18 +311,22 @@ export type PropertyWhereInput = {
   title?: Prisma.StringFilter<"Property"> | string
   description?: Prisma.StringNullableFilter<"Property"> | string | null
   city?: Prisma.StringFilter<"Property"> | string
-  area?: Prisma.IntFilter<"Property"> | number
+  neighborhood?: Prisma.StringNullableFilter<"Property"> | string | null
+  area?: Prisma.IntNullableFilter<"Property"> | number | null
   rooms?: Prisma.IntFilter<"Property"> | number
-  bathrooms?: Prisma.IntFilter<"Property"> | number
+  bathrooms?: Prisma.IntNullableFilter<"Property"> | number | null
   price?: Prisma.IntFilter<"Property"> | number
   categoryId?: Prisma.StringFilter<"Property"> | string
   featured?: Prisma.BoolFilter<"Property"> | boolean
+  priceType?: Prisma.StringFilter<"Property"> | string
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
+  vedioUrl?: Prisma.StringNullableFilter<"Property"> | string | null
   sellerId?: Prisma.StringFilter<"Property"> | string
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   category?: Prisma.XOR<Prisma.CategoryScalarRelationFilter, Prisma.CategoryWhereInput>
   seller?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  media?: Prisma.MediaListRelationFilter
 }
 
 export type PropertyOrderByWithRelationInput = {
@@ -309,18 +334,22 @@ export type PropertyOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrder
-  area?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrderInput | Prisma.SortOrder
+  area?: Prisma.SortOrderInput | Prisma.SortOrder
   rooms?: Prisma.SortOrder
-  bathrooms?: Prisma.SortOrder
+  bathrooms?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   featured?: Prisma.SortOrder
+  priceType?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  vedioUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   category?: Prisma.CategoryOrderByWithRelationInput
   seller?: Prisma.UserOrderByWithRelationInput
+  media?: Prisma.MediaOrderByRelationAggregateInput
 }
 
 export type PropertyWhereUniqueInput = Prisma.AtLeast<{
@@ -331,18 +360,22 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Property"> | string
   description?: Prisma.StringNullableFilter<"Property"> | string | null
   city?: Prisma.StringFilter<"Property"> | string
-  area?: Prisma.IntFilter<"Property"> | number
+  neighborhood?: Prisma.StringNullableFilter<"Property"> | string | null
+  area?: Prisma.IntNullableFilter<"Property"> | number | null
   rooms?: Prisma.IntFilter<"Property"> | number
-  bathrooms?: Prisma.IntFilter<"Property"> | number
+  bathrooms?: Prisma.IntNullableFilter<"Property"> | number | null
   price?: Prisma.IntFilter<"Property"> | number
   categoryId?: Prisma.StringFilter<"Property"> | string
   featured?: Prisma.BoolFilter<"Property"> | boolean
+  priceType?: Prisma.StringFilter<"Property"> | string
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
+  vedioUrl?: Prisma.StringNullableFilter<"Property"> | string | null
   sellerId?: Prisma.StringFilter<"Property"> | string
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   category?: Prisma.XOR<Prisma.CategoryScalarRelationFilter, Prisma.CategoryWhereInput>
   seller?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  media?: Prisma.MediaListRelationFilter
 }, "id">
 
 export type PropertyOrderByWithAggregationInput = {
@@ -350,13 +383,16 @@ export type PropertyOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrder
-  area?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrderInput | Prisma.SortOrder
+  area?: Prisma.SortOrderInput | Prisma.SortOrder
   rooms?: Prisma.SortOrder
-  bathrooms?: Prisma.SortOrder
+  bathrooms?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   featured?: Prisma.SortOrder
+  priceType?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  vedioUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -375,13 +411,16 @@ export type PropertyScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Property"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   city?: Prisma.StringWithAggregatesFilter<"Property"> | string
-  area?: Prisma.IntWithAggregatesFilter<"Property"> | number
+  neighborhood?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  area?: Prisma.IntNullableWithAggregatesFilter<"Property"> | number | null
   rooms?: Prisma.IntWithAggregatesFilter<"Property"> | number
-  bathrooms?: Prisma.IntWithAggregatesFilter<"Property"> | number
+  bathrooms?: Prisma.IntNullableWithAggregatesFilter<"Property"> | number | null
   price?: Prisma.IntWithAggregatesFilter<"Property"> | number
   categoryId?: Prisma.StringWithAggregatesFilter<"Property"> | string
   featured?: Prisma.BoolWithAggregatesFilter<"Property"> | boolean
+  priceType?: Prisma.StringWithAggregatesFilter<"Property"> | string
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  vedioUrl?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   sellerId?: Prisma.StringWithAggregatesFilter<"Property"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
@@ -392,16 +431,20 @@ export type PropertyCreateInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   category: Prisma.CategoryCreateNestedOneWithoutPropertiesInput
   seller: Prisma.UserCreateNestedOneWithoutPropertiesInput
+  media?: Prisma.MediaCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateInput = {
@@ -409,16 +452,20 @@ export type PropertyUncheckedCreateInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   categoryId: string
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   sellerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUpdateInput = {
@@ -426,16 +473,20 @@ export type PropertyUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneRequiredWithoutPropertiesNestedInput
   seller?: Prisma.UserUpdateOneRequiredWithoutPropertiesNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateInput = {
@@ -443,16 +494,20 @@ export type PropertyUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyInput = {
@@ -460,13 +515,16 @@ export type PropertyCreateManyInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   categoryId: string
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   sellerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -477,12 +535,15 @@ export type PropertyUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -492,13 +553,16 @@ export type PropertyUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -519,13 +583,16 @@ export type PropertyCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   city?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrder
   area?: Prisma.SortOrder
   rooms?: Prisma.SortOrder
   bathrooms?: Prisma.SortOrder
   price?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   featured?: Prisma.SortOrder
+  priceType?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
+  vedioUrl?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -543,13 +610,16 @@ export type PropertyMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   city?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrder
   area?: Prisma.SortOrder
   rooms?: Prisma.SortOrder
   bathrooms?: Prisma.SortOrder
   price?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   featured?: Prisma.SortOrder
+  priceType?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
+  vedioUrl?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -560,13 +630,16 @@ export type PropertyMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   city?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrder
   area?: Prisma.SortOrder
   rooms?: Prisma.SortOrder
   bathrooms?: Prisma.SortOrder
   price?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   featured?: Prisma.SortOrder
+  priceType?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
+  vedioUrl?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -577,6 +650,11 @@ export type PropertySumOrderByAggregateInput = {
   rooms?: Prisma.SortOrder
   bathrooms?: Prisma.SortOrder
   price?: Prisma.SortOrder
+}
+
+export type PropertyScalarRelationFilter = {
+  is?: Prisma.PropertyWhereInput
+  isNot?: Prisma.PropertyWhereInput
 }
 
 export type PropertyCreateNestedManyWithoutCategoryInput = {
@@ -663,20 +741,18 @@ export type PropertyUncheckedUpdateManyWithoutSellerNestedInput = {
   deleteMany?: Prisma.PropertyScalarWhereInput | Prisma.PropertyScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
+export type PropertyCreateNestedOneWithoutMediaInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutMediaInput
+  connect?: Prisma.PropertyWhereUniqueInput
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
+export type PropertyUpdateOneRequiredWithoutMediaNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutMediaInput
+  upsert?: Prisma.PropertyUpsertWithoutMediaInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutMediaInput, Prisma.PropertyUpdateWithoutMediaInput>, Prisma.PropertyUncheckedUpdateWithoutMediaInput>
 }
 
 export type PropertyCreateWithoutCategoryInput = {
@@ -684,15 +760,19 @@ export type PropertyCreateWithoutCategoryInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   seller: Prisma.UserCreateNestedOneWithoutPropertiesInput
+  media?: Prisma.MediaCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutCategoryInput = {
@@ -700,15 +780,19 @@ export type PropertyUncheckedCreateWithoutCategoryInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   sellerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutCategoryInput = {
@@ -745,13 +829,16 @@ export type PropertyScalarWhereInput = {
   title?: Prisma.StringFilter<"Property"> | string
   description?: Prisma.StringNullableFilter<"Property"> | string | null
   city?: Prisma.StringFilter<"Property"> | string
-  area?: Prisma.IntFilter<"Property"> | number
+  neighborhood?: Prisma.StringNullableFilter<"Property"> | string | null
+  area?: Prisma.IntNullableFilter<"Property"> | number | null
   rooms?: Prisma.IntFilter<"Property"> | number
-  bathrooms?: Prisma.IntFilter<"Property"> | number
+  bathrooms?: Prisma.IntNullableFilter<"Property"> | number | null
   price?: Prisma.IntFilter<"Property"> | number
   categoryId?: Prisma.StringFilter<"Property"> | string
   featured?: Prisma.BoolFilter<"Property"> | boolean
+  priceType?: Prisma.StringFilter<"Property"> | string
   imageUrl?: Prisma.StringNullableFilter<"Property"> | string | null
+  vedioUrl?: Prisma.StringNullableFilter<"Property"> | string | null
   sellerId?: Prisma.StringFilter<"Property"> | string
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
@@ -762,15 +849,19 @@ export type PropertyCreateWithoutSellerInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   category: Prisma.CategoryCreateNestedOneWithoutPropertiesInput
+  media?: Prisma.MediaCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutSellerInput = {
@@ -778,15 +869,19 @@ export type PropertyUncheckedCreateWithoutSellerInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   categoryId: string
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutSellerInput = {
@@ -815,17 +910,116 @@ export type PropertyUpdateManyWithWhereWithoutSellerInput = {
   data: Prisma.XOR<Prisma.PropertyUpdateManyMutationInput, Prisma.PropertyUncheckedUpdateManyWithoutSellerInput>
 }
 
+export type PropertyCreateWithoutMediaInput = {
+  id?: string
+  title: string
+  description?: string | null
+  city: string
+  neighborhood?: string | null
+  area?: number | null
+  rooms: number
+  bathrooms?: number | null
+  price: number
+  featured?: boolean
+  priceType?: string
+  imageUrl?: string | null
+  vedioUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  category: Prisma.CategoryCreateNestedOneWithoutPropertiesInput
+  seller: Prisma.UserCreateNestedOneWithoutPropertiesInput
+}
+
+export type PropertyUncheckedCreateWithoutMediaInput = {
+  id?: string
+  title: string
+  description?: string | null
+  city: string
+  neighborhood?: string | null
+  area?: number | null
+  rooms: number
+  bathrooms?: number | null
+  price: number
+  categoryId: string
+  featured?: boolean
+  priceType?: string
+  imageUrl?: string | null
+  vedioUrl?: string | null
+  sellerId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PropertyCreateOrConnectWithoutMediaInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+}
+
+export type PropertyUpsertWithoutMediaInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutMediaInput, Prisma.PropertyUncheckedUpdateWithoutMediaInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutMediaInput, Prisma.PropertyUncheckedCreateWithoutMediaInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutMediaInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutMediaInput, Prisma.PropertyUncheckedUpdateWithoutMediaInput>
+}
+
+export type PropertyUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  price?: Prisma.IntFieldUpdateOperationsInput | number
+  featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.CategoryUpdateOneRequiredWithoutPropertiesNestedInput
+  seller?: Prisma.UserUpdateOneRequiredWithoutPropertiesNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  price?: Prisma.IntFieldUpdateOperationsInput | number
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sellerId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type PropertyCreateManyCategoryInput = {
   id?: string
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   sellerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -836,15 +1030,19 @@ export type PropertyUpdateWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   seller?: Prisma.UserUpdateOneRequiredWithoutPropertiesNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutCategoryInput = {
@@ -852,15 +1050,19 @@ export type PropertyUncheckedUpdateWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateManyWithoutCategoryInput = {
@@ -868,12 +1070,15 @@ export type PropertyUncheckedUpdateManyWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -884,13 +1089,16 @@ export type PropertyCreateManySellerInput = {
   title: string
   description?: string | null
   city: string
-  area: number
+  neighborhood?: string | null
+  area?: number | null
   rooms: number
-  bathrooms: number
+  bathrooms?: number | null
   price: number
   categoryId: string
   featured?: boolean
+  priceType?: string
   imageUrl?: string | null
+  vedioUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -900,15 +1108,19 @@ export type PropertyUpdateWithoutSellerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneRequiredWithoutPropertiesNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutSellerInput = {
@@ -916,15 +1128,19 @@ export type PropertyUncheckedUpdateWithoutSellerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateManyWithoutSellerInput = {
@@ -932,17 +1148,49 @@ export type PropertyUncheckedUpdateManyWithoutSellerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  area?: Prisma.IntFieldUpdateOperationsInput | number
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  area?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   rooms?: Prisma.IntFieldUpdateOperationsInput | number
-  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   price?: Prisma.IntFieldUpdateOperationsInput | number
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priceType?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vedioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type PropertyCountOutputType
+ */
+
+export type PropertyCountOutputType = {
+  media: number
+}
+
+export type PropertyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  media?: boolean | PropertyCountOutputTypeCountMediaArgs
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyCountOutputType
+   */
+  select?: Prisma.PropertyCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountMediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaWhereInput
+}
 
 
 export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -950,18 +1198,23 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   title?: boolean
   description?: boolean
   city?: boolean
+  neighborhood?: boolean
   area?: boolean
   rooms?: boolean
   bathrooms?: boolean
   price?: boolean
   categoryId?: boolean
   featured?: boolean
+  priceType?: boolean
   imageUrl?: boolean
+  vedioUrl?: boolean
   sellerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
   seller?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  media?: boolean | Prisma.Property$mediaArgs<ExtArgs>
+  _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
 
 export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -969,13 +1222,16 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   title?: boolean
   description?: boolean
   city?: boolean
+  neighborhood?: boolean
   area?: boolean
   rooms?: boolean
   bathrooms?: boolean
   price?: boolean
   categoryId?: boolean
   featured?: boolean
+  priceType?: boolean
   imageUrl?: boolean
+  vedioUrl?: boolean
   sellerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -988,13 +1244,16 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   title?: boolean
   description?: boolean
   city?: boolean
+  neighborhood?: boolean
   area?: boolean
   rooms?: boolean
   bathrooms?: boolean
   price?: boolean
   categoryId?: boolean
   featured?: boolean
+  priceType?: boolean
   imageUrl?: boolean
+  vedioUrl?: boolean
   sellerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1007,22 +1266,27 @@ export type PropertySelectScalar = {
   title?: boolean
   description?: boolean
   city?: boolean
+  neighborhood?: boolean
   area?: boolean
   rooms?: boolean
   bathrooms?: boolean
   price?: boolean
   categoryId?: boolean
   featured?: boolean
+  priceType?: boolean
   imageUrl?: boolean
+  vedioUrl?: boolean
   sellerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "city" | "area" | "rooms" | "bathrooms" | "price" | "categoryId" | "featured" | "imageUrl" | "sellerId" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
+export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "city" | "neighborhood" | "area" | "rooms" | "bathrooms" | "price" | "categoryId" | "featured" | "priceType" | "imageUrl" | "vedioUrl" | "sellerId" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
   seller?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  media?: boolean | Prisma.Property$mediaArgs<ExtArgs>
+  _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PropertyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
@@ -1038,19 +1302,23 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     category: Prisma.$CategoryPayload<ExtArgs>
     seller: Prisma.$UserPayload<ExtArgs>
+    media: Prisma.$MediaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string
     description: string | null
     city: string
-    area: number
+    neighborhood: string | null
+    area: number | null
     rooms: number
-    bathrooms: number
+    bathrooms: number | null
     price: number
     categoryId: string
     featured: boolean
+    priceType: string
     imageUrl: string | null
+    vedioUrl: string | null
     sellerId: string
     createdAt: Date
     updatedAt: Date
@@ -1450,6 +1718,7 @@ export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   category<T extends Prisma.CategoryDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CategoryDefaultArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   seller<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  media<T extends Prisma.Property$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1483,13 +1752,16 @@ export interface PropertyFieldRefs {
   readonly title: Prisma.FieldRef<"Property", 'String'>
   readonly description: Prisma.FieldRef<"Property", 'String'>
   readonly city: Prisma.FieldRef<"Property", 'String'>
+  readonly neighborhood: Prisma.FieldRef<"Property", 'String'>
   readonly area: Prisma.FieldRef<"Property", 'Int'>
   readonly rooms: Prisma.FieldRef<"Property", 'Int'>
   readonly bathrooms: Prisma.FieldRef<"Property", 'Int'>
   readonly price: Prisma.FieldRef<"Property", 'Int'>
   readonly categoryId: Prisma.FieldRef<"Property", 'String'>
   readonly featured: Prisma.FieldRef<"Property", 'Boolean'>
+  readonly priceType: Prisma.FieldRef<"Property", 'String'>
   readonly imageUrl: Prisma.FieldRef<"Property", 'String'>
+  readonly vedioUrl: Prisma.FieldRef<"Property", 'String'>
   readonly sellerId: Prisma.FieldRef<"Property", 'String'>
   readonly createdAt: Prisma.FieldRef<"Property", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Property", 'DateTime'>
@@ -1891,6 +2163,30 @@ export type PropertyDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Properties to delete.
    */
   limit?: number
+}
+
+/**
+ * Property.media
+ */
+export type Property$mediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Media
+   */
+  select?: Prisma.MediaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Media
+   */
+  omit?: Prisma.MediaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaInclude<ExtArgs> | null
+  where?: Prisma.MediaWhereInput
+  orderBy?: Prisma.MediaOrderByWithRelationInput | Prisma.MediaOrderByWithRelationInput[]
+  cursor?: Prisma.MediaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaScalarFieldEnum | Prisma.MediaScalarFieldEnum[]
 }
 
 /**

@@ -68,7 +68,7 @@ export async function registerAction(formData: FormData, locale: string) {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: `/${locale}/dashboard/seller`,
+      redirectTo: `/${locale}`,
     });
   } catch (error) {
     if (error instanceof AuthError) {

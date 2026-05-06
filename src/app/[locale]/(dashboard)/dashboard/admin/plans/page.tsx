@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { plans } from "@/lib/site-data";
+import { AdminPlansPanel } from "@/components/admin/admin-plans-panel";
+import { prisma } from "@/lib/prisma";
 import { getMessages } from "@/lib/messages";
 import type { Locale } from "@/lib/locales";
 
@@ -10,6 +10,9 @@ export default async function AdminPlansPage({
 }) {
   const { locale } = await params;
   const messages = getMessages(locale);
+  const plans = await prisma.plan.findMany({
+    orderBy: { price: "asc" },
+  });
 
   return (
     <div className="space-y-6">
@@ -23,26 +26,7 @@ export default async function AdminPlansPage({
             : "Change seller tiers and adjust listing limits."}
         </p>
       </div>
-      <div className="grid gap-6 lg:grid-cols-3">
-        {plans.map((plan) => (
-          <Card key={plan.id}>
-            <CardHeader>
-              <CardTitle>{plan.title[locale]}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <div>{plan.description[locale]}</div>
-              <div>
-                {locale === "ar" ? "الحد" : "Limit"}:{" "}
-                {plan.listings === "unlimited"
-                  ? locale === "ar"
-                    ? "غير محدود"
-                    : "Unlimited"
-                  : plan.listings}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <AdminPlansPanel locale={locale} initialPlans={plans} />
     </div>
   );
 }

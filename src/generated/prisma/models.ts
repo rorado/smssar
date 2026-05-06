@@ -8,7 +8,10 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/City'
 export type * from './models/Category'
+export type * from './models/Plan'
 export type * from './models/User'
 export type * from './models/Property'
+export type * from './models/Media'
 export type * from './commonInputTypes'
