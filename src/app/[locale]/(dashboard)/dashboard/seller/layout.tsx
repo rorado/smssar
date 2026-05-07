@@ -3,6 +3,7 @@ import {
   BarChart3,
   FilePlus2,
   FolderHeart,
+  Heart,
   MessageSquareText,
   Settings2,
   UserRound,
@@ -67,6 +68,11 @@ export default async function SellerDashboardLayout({
       label: messages.dashboard.seller.profile,
       href: `/${locale}/dashboard/seller/profile`,
       icon: <UserRound className="h-4 w-4" />,
+    },
+    {
+      label: messages.nav.favorites,
+      href: `/${locale}/dashboard/seller/favorites`,
+      icon: <Heart className="h-4 w-4" />,
     },
   ];
 

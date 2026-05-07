@@ -100,13 +100,9 @@ export function AdminCategoriesPanel({
 
       if (isEditing) {
         setEditingId(null);
-        toast.success(
-          locale === "ar" ? "تم تحديث الفئة." : "Category updated.",
-        );
+        toast.success(locale === "ar" ? "تم تحديث الفئة." : "Category updated.");
       } else {
-        toast.success(
-          locale === "ar" ? "تم إنشاء الفئة." : "Category created.",
-        );
+        toast.success(locale === "ar" ? "تم إنشاء الفئة." : "Category created.");
       }
     } catch (error) {
       console.error(
@@ -233,11 +229,7 @@ export function AdminCategoriesPanel({
             </div>
 
             <div className="flex gap-2">
-              <Button
-                type="submit"
-                className="flex-1 gap-2"
-                disabled={creating || saving}
-              >
+              <Button type="submit" className="flex-1 gap-2" disabled={creating || saving}>
                 {creating || saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : editingId ? (

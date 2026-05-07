@@ -19,10 +19,12 @@ import { formatCurrency } from "@/lib/format";
 import { getMessages } from "@/lib/messages";
 import { properties } from "@/lib/site-data";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import type { Locale } from "@/lib/locales";
 import type { Property } from "@/lib/site-data";
 import type { ReactNode } from "react";
 import MediaSwiper from "@/components/media/media-swiper-client";
+import { FavoriteButton } from "@/components/property/favorite-button";
 
 type PropertyDisplay = Property & {
   sellerId?: string;
@@ -43,6 +45,7 @@ export default async function PropertyDetailPage({
 }) {
   const { locale, id } = await params;
   const messages = getMessages(locale);
+  const session = await auth();
 
   // Try to find property in mock data first
   let property: PropertyDisplay | undefined = properties.find(
@@ -122,6 +125,20 @@ export default async function PropertyDetailPage({
     notFound();
   }
 
+  const isDatabaseProperty = Boolean(property.sellerId);
+  const favorite =
+    session?.user?.id && isDatabaseProperty
+      ? await prisma.favorite.findUnique({
+          where: {
+            userId_propertyId: {
+              userId: session.user.id,
+              propertyId: property.id,
+            },
+          },
+          select: { id: true },
+        })
+      : null;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <Link
@@ -137,21 +154,31 @@ export default async function PropertyDetailPage({
           <div>
             <div className="relative ">
               {/* Hydrate client-side media swiper */}
-              {/* prepare media array for the client swiper */}
+              {/* prepare media array for the client swiper: include imageUrl as cover and any media, deduped by URL */}
               {(() => {
-                const mediaForSwiper = property.media?.length
-                  ? property.media
-                  : property.imageUrl
-                    ? [
-                        {
-                          id: `${property.id}-cover`,
-                          url: property.imageUrl,
-                          resourceType: "image" as const,
-                        },
-                      ]
-                    : [];
+                const items: Array<{
+                  id: string;
+                  url: string;
+                  resourceType: "image" | "video";
+                }> = [];
 
-                return <MediaSwiper media={mediaForSwiper} />;
+                if (property.imageUrl) {
+                  items.push({
+                    id: `${property.id}-cover`,
+                    url: property.imageUrl,
+                    resourceType: "image",
+                  });
+                }
+
+                if (property.media?.length) {
+                  for (const m of property.media) {
+                    if (!items.some((i) => i.url === m.url)) {
+                      items.push(m);
+                    }
+                  }
+                }
+
+                return <MediaSwiper media={items} />;
               })()}
             </div>
             <div className="mt-4">
@@ -285,14 +312,25 @@ export default async function PropertyDetailPage({
                   </ButtonLink>
                 ) : null}
               </div>
-              <ButtonLink
-                href={`/${locale}/login`}
-                variant="accent"
-                className="w-full"
-              >
-                {messages.common.contactSeller}
-                <Heart className="h-4 w-4" />
-              </ButtonLink>
+              {session?.user?.id ? (
+                <FavoriteButton
+                  key={`${property.id}-${Boolean(favorite)}`}
+                  locale={locale}
+                  propertyId={property.id}
+                  initialFavorite={Boolean(favorite)}
+                  enabled={isDatabaseProperty}
+                  className="w-full"
+                />
+              ) : (
+                <ButtonLink
+                  href={`/${locale}/login`}
+                  variant="accent"
+                  className="w-full"
+                >
+                  {messages.common.save}
+                  <Heart className="h-4 w-4" />
+                </ButtonLink>
+              )}
             </CardContent>
           </Card>
 

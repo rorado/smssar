@@ -74,11 +74,12 @@ export default async function LandingPage({ locale }: { locale: Locale }) {
                   {messages.home.heroDescription}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 ">
                 <ButtonLink
                   href={`/${locale}/properties`}
                   variant="accent"
                   size="lg"
+                  className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600"
                 >
                   {messages.home.heroCta}
                   <ArrowRight className="h-4 w-4 rtl:rotate-180" />
@@ -171,6 +172,7 @@ export default async function LandingPage({ locale }: { locale: Locale }) {
                 key={property.id}
                 locale={locale}
                 property={property}
+                favoriteEnabled={false}
               />
             ))}
           </div>

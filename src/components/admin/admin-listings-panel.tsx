@@ -96,7 +96,9 @@ export function AdminListingsPanel({
   const [rooms, setRooms] = useState("1");
   const [bathrooms, setBathrooms] = useState("");
   const [price, setPrice] = useState("0");
-  const [priceType, setPriceType] = useState<"MONTHLY" | "DAILY">("MONTHLY");
+  const [priceType, setPriceType] = useState<"MONTHLY" | "DAILY">(
+    "MONTHLY",
+  );
   const [categoryId, setCategoryId] = useState("");
   const [featured, setFeatured] = useState(false);
   const [newImages, setNewImages] = useState<
@@ -988,6 +990,7 @@ export function AdminListingsPanel({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
+
                   />
                 </div>
 
@@ -1101,10 +1104,7 @@ export function AdminListingsPanel({
                     </div>
 
                     <div>
-                      <Label
-                        htmlFor="edit-price-input"
-                        className="mb-2 block font-medium"
-                      >
+                      <Label htmlFor="edit-price-input" className="mb-2 block font-medium">
                         {priceType === "MONTHLY"
                           ? locale === "ar"
                             ? "السعر الشهري (د.م / MAD)"

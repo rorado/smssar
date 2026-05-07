@@ -4,6 +4,7 @@ import {
   MapPinned,
   FileBadge2,
   ListChecks,
+  Heart,
   Tags,
   Users,
   Settings2,
@@ -73,6 +74,11 @@ export default async function AdminDashboardLayout({
       label: messages.dashboard.admin.reports,
       href: `/${locale}/dashboard/admin/reports`,
       icon: <FileBadge2 className="h-4 w-4" />,
+    },
+    {
+      label: messages.nav.favorites,
+      href: `/${locale}/dashboard/admin/favorites`,
+      icon: <Heart className="h-4 w-4" />,
     },
   ];
 

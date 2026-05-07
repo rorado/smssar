@@ -121,6 +121,11 @@ export const messages = {
         plans: "Seller plans",
         reports: "Reports",
       },
+      profile: {
+        favorites: "Saved properties",
+        favoritesDescription: "Your favorite listings appear here.",
+        favoritesEmpty: "You have not saved any properties yet.",
+      },
     },
     pricing: {
       title: "Flexible plans for every seller",
@@ -250,6 +255,11 @@ export const messages = {
         cities: "إدارة المدن",
         plans: "خطط البائعين",
         reports: "التقارير",
+      },
+      profile: {
+        favorites: "العقارات المحفوظة",
+        favoritesDescription: "تظهر هنا العقارات التي أضفتها إلى المفضلة.",
+        favoritesEmpty: "لم تحفظ أي عقار بعد.",
       },
     },
     pricing: {
@@ -383,6 +393,11 @@ export const messages = {
         cities: "Gérer les villes",
         plans: "Forfaits vendeur",
         reports: "Rapports",
+      },
+      profile: {
+        favorites: "Biens enregistrés",
+        favoritesDescription: "Vos annonces favorites apparaissent ici.",
+        favoritesEmpty: "Vous n'avez encore enregistré aucun bien.",
       },
     },
     pricing: {

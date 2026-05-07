@@ -14,7 +14,7 @@ const variantClasses: Record<Variant, string> = {
   outline: "border border-border bg-background hover:bg-muted/60",
   ghost: "hover:bg-muted/60",
   accent:
-    "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg hover:opacity-95",
+    "bg-violet-500 from-primary-500 to-secondary-600 text-white shadow-lg hover:opacity-95",
 };
 
 const sizeClasses: Record<Size, string> = {

@@ -111,10 +111,7 @@ export function AdminCitiesPanel({
         toast.success(locale === "ar" ? "تم إنشاء المدينة." : "City created.");
       }
     } catch (error) {
-      console.error(
-        isEditing ? "Failed to update city:" : "Failed to create city:",
-        error,
-      );
+      console.error(isEditing ? "Failed to update city:" : "Failed to create city:", error);
       toast.error(
         locale === "ar"
           ? isEditing
@@ -232,11 +229,7 @@ export function AdminCitiesPanel({
             </div>
 
             <div className="flex gap-2">
-              <Button
-                type="submit"
-                className="flex-1 gap-2"
-                disabled={creating || saving}
-              >
+              <Button type="submit" className="flex-1 gap-2" disabled={creating || saving}>
                 {creating || saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : editingId ? (

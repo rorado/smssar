@@ -13,7 +13,7 @@ export default async function AuthLayout({
   const { locale } = (await params) as { locale: Locale };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.10),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.08),transparent_25%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.10),transparent_35%),radial-gradient(circle_at_bottom_left,hsl(var(--secondary)/0.08),transparent_25%)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
         <Link
           href={`/${locale}`}

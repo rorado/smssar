@@ -3,7 +3,6 @@ import {
   Bath,
   BedDouble,
   Building2,
-  Heart,
   MapPin,
   Ruler,
 } from "lucide-react";
@@ -16,6 +15,7 @@ import { formatCurrency } from "@/lib/format";
 import type { Locale } from "@/lib/locales";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { FavoriteButton } from "@/components/property/favorite-button";
 
 const t = <T extends { en: string; ar: string; fr: string }>(
   locale: Locale,
@@ -39,6 +39,8 @@ export interface PropertyCardProps {
   rating: number;
   inquiries: number;
   media?: Array<Pick<Media, "id" | "url" | "publicId" | "type">>;
+  isFavorite?: boolean;
+  favoriteEnabled?: boolean;
 }
 
 const colorPalettes = [
@@ -58,9 +60,11 @@ function getColorPalette(id: string): [string, string] {
 export function PropertyCard({
   locale,
   property,
+  favoriteEnabled = true,
 }: {
   locale: Locale;
   property: PropertyCardProps;
+  favoriteEnabled?: boolean;
 }) {
   const palette = getColorPalette(property.id);
   const primaryMediaImage = property.media?.find(
@@ -166,7 +170,7 @@ export function PropertyCard({
         <ButtonLink
           href={`/${locale}/properties/${property.id}`}
           variant="accent"
-          className="flex-1"
+          className="flex-1 bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600"
         >
           {t(locale, {
             en: "View details",
@@ -175,17 +179,14 @@ export function PropertyCard({
           })}
           <ArrowUpRight className="h-4 w-4" />
         </ButtonLink>
-        <button
-          type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/80 bg-background text-muted-foreground transition hover:text-foreground"
-          aria-label={t(locale, {
-            en: "Save favorite",
-            ar: "حفظ في المفضلة",
-            fr: "Enregistrer en favori",
-          })}
-        >
-          <Heart className="h-4 w-4" />
-        </button>
+        <FavoriteButton
+          key={`${property.id}-${property.isFavorite ?? false}`}
+          locale={locale}
+          propertyId={property.id}
+          initialFavorite={property.isFavorite ?? false}
+          enabled={favoriteEnabled && (property.favoriteEnabled ?? true)}
+          className="h-11 w-11 shrink-0 px-0"
+        />
       </CardFooter>
     </Card>
   );

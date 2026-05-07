@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { UserRound } from "lucide-react";
+import { Heart, UserRound } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -34,6 +34,11 @@ export default async function UserProfileLayout({
       label: messages.nav.profile,
       href: `/${locale}/dashboard/profile`,
       icon: <UserRound className="h-4 w-4" />,
+    },
+    {
+      label: messages.nav.favorites,
+      href: `/${locale}/dashboard/profile/favorites`,
+      icon: <Heart className="h-4 w-4" />,
     },
   ];
 

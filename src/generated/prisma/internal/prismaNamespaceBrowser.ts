@@ -56,6 +56,7 @@ export const ModelName = {
   Plan: 'Plan',
   User: 'User',
   Property: 'Property',
+  Favorite: 'Favorite',
   Media: 'Media'
 } as const
 
@@ -160,6 +161,16 @@ export const PropertyScalarFieldEnum = {
 } as const
 
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
+
+
+export const FavoriteScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  propertyId: 'propertyId',
+  createdAt: 'createdAt'
+} as const
+
+export type FavoriteScalarFieldEnum = (typeof FavoriteScalarFieldEnum)[keyof typeof FavoriteScalarFieldEnum]
 
 
 export const MediaScalarFieldEnum = {

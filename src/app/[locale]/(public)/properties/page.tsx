@@ -1,4 +1,5 @@
 import { PropertyExplorer } from "@/components/property/property-explorer";
+import { auth } from "@/auth";
 import { getMessages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/locales";
@@ -23,6 +24,7 @@ export default async function PropertiesPage({
 }) {
   const { locale } = await params;
   const messages = getMessages(locale);
+  const session = await auth();
   const resolvedSearchParams = (await searchParams) ?? {};
   const currentPage = toPositiveInteger(resolvedSearchParams.page, 1);
   const query = Array.isArray(resolvedSearchParams.query)
@@ -124,6 +126,20 @@ export default async function PropertiesPage({
     }),
   ]);
 
+  const favoritePropertyIds = session?.user?.id
+    ? new Set(
+        (
+          await prisma.favorite.findMany({
+            where: {
+              userId: session.user.id,
+              propertyId: { in: properties.map((property) => property.id) },
+            },
+            select: { propertyId: true },
+          })
+        ).map((item) => item.propertyId),
+      )
+    : new Set<string>();
+
   const cities = await prisma.city.findMany({
     select: {
       name: true,
@@ -171,6 +187,8 @@ export default async function PropertiesPage({
       type: m.type,
       publicId: m.publicId,
     })),
+    isFavorite: favoritePropertyIds.has(property.id),
+    favoriteEnabled: true,
   }));
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

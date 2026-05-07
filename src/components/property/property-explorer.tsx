@@ -311,6 +311,7 @@ export function PropertyExplorer({
             variant="accent"
             onClick={applyFilters}
             disabled={isLoading}
+            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600"
           >
             {isLoading ? (
               <>

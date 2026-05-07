@@ -43,6 +43,11 @@ export type User = Prisma.UserModel
  */
 export type Property = Prisma.PropertyModel
 /**
+ * Model Favorite
+ * 
+ */
+export type Favorite = Prisma.FavoriteModel
+/**
  * Model Media
  * 
  */
