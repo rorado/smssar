@@ -16,16 +16,13 @@ export default async function SellerAddPage({
       orderBy: { name: "asc" },
       select: { id: true, name: true, slug: true },
     }),
-    prisma.property.findMany({
-      distinct: ["city"],
-      select: { city: true },
-      orderBy: { city: "asc" },
+    prisma.city.findMany({
+      select: { name: true },
+      orderBy: { name: "asc" },
     }),
   ]);
 
-  const uniqueCities = Array.from(
-    new Map(cities.map((item) => [item.city, item])).values(),
-  ).map((item) => item.city);
+  const uniqueCities = cities.map((city) => city.name);
 
   return (
     <div className="space-y-6">

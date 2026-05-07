@@ -142,11 +142,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (data.city !== undefined && data.city.length === 0) {
     return jsonError("City is required.", 400);
   }
-  if (
-    data.neighborhood !== undefined &&
-    data.neighborhood !== null &&
-    data.neighborhood.length === 0
-  ) {
+  if (!data.neighborhood || data.neighborhood.length === 0) {
     return jsonError("Neighborhood is required.", 400);
   }
   if (data.categoryId !== undefined && data.categoryId.length === 0) {

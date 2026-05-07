@@ -39,20 +39,18 @@ export default async function EditListingPage({
     notFound();
   }
 
-  const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, slug: true },
-  });
+  const [categories, allCities] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+    prisma.city.findMany({
+      select: { name: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
-  const allCities = await prisma.property.findMany({
-    distinct: ["city"],
-    select: { city: true },
-    orderBy: { city: "asc" },
-  });
-
-  const uniqueCities = Array.from(
-    new Map(allCities.map((item) => [item.city, item])).values(),
-  ).map((item) => item.city);
+  const uniqueCities = allCities.map((city) => city.name);
 
   // Convert database property to ListingForm compatible format
   const priceType =

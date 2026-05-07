@@ -9,6 +9,7 @@ import {
   ImagePlus,
   Loader2,
   Save,
+  Star,
   Trash2,
   Video,
   X,
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getVideoThumbnailUrl } from "../../lib/media";
 import { formatCurrency } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,14 +98,13 @@ export function AdminListingsPanel({
   const [rooms, setRooms] = useState("1");
   const [bathrooms, setBathrooms] = useState("");
   const [price, setPrice] = useState("0");
-  const [priceType, setPriceType] = useState<"MONTHLY" | "DAILY">(
-    "MONTHLY",
-  );
+  const [priceType, setPriceType] = useState<"MONTHLY" | "DAILY">("MONTHLY");
   const [categoryId, setCategoryId] = useState("");
   const [featured, setFeatured] = useState(false);
   const [newImages, setNewImages] = useState<
     Array<{ url: string; publicId: string; resourceType: string }>
   >([]);
+  const [coverUrl, setCoverUrl] = useState<string | undefined>(undefined);
   const [existingMediaToDelete, setExistingMediaToDelete] = useState<
     Set<string>
   >(new Set());
@@ -138,21 +139,28 @@ export function AdminListingsPanel({
     router.push(`?${params.toString()}`);
   };
 
-  const clearFilters = () => {
-    router.push("?");
-  };
-
   const heroMedia = useMemo(() => {
     const activeExistingMedia = (editingMedia ?? []).filter(
       (media) => !existingMediaToDelete.has(media.id),
     );
 
+    if (coverUrl) {
+      const selectedExisting = activeExistingMedia.find(
+        (media) => media.url === coverUrl,
+      );
+      if (selectedExisting) return selectedExisting;
+
+      const selectedNew = newImages.find((asset) => asset.url === coverUrl);
+      if (selectedNew) return selectedNew;
+    }
+
     return activeExistingMedia[0] ?? newImages[0] ?? null;
-  }, [editingMedia, existingMediaToDelete, newImages]);
+  }, [coverUrl, editingMedia, existingMediaToDelete, newImages]);
 
   const startEdit = (item: PropertyRow) => {
     setEditingId(item.id);
     setEditingMedia(item.media ?? []);
+    setCoverUrl(item.imageUrl ?? item.media?.[0]?.url ?? undefined);
     setTitle(item.title);
     setDescription(item.description ?? "");
     setCity(item.city);
@@ -178,6 +186,7 @@ export function AdminListingsPanel({
   const cancelEdit = () => {
     setEditingId(null);
     setEditingMedia([]);
+    setCoverUrl(undefined);
     setTitle("");
     setDescription("");
     setCity("");
@@ -274,7 +283,16 @@ export function AdminListingsPanel({
       return;
     }
 
-    setNewImages((prev) => prev.filter((_, i) => i !== index));
+    setNewImages((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      if (asset.url === coverUrl) {
+        const nextCover =
+          next[0]?.url ??
+          editingMedia?.find((m) => !existingMediaToDelete.has(m.id))?.url;
+        setCoverUrl(nextCover);
+      }
+      return next;
+    });
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
@@ -376,6 +394,7 @@ export function AdminListingsPanel({
         featured: boolean;
         area?: number;
         bathrooms?: number;
+        imageUrl?: string | null;
         images?: Array<{ url: string; publicId: string; type: string }>;
         deleteMediaIds?: string[];
         priceType?: string;
@@ -394,13 +413,17 @@ export function AdminListingsPanel({
       if (area.trim()) body.area = Number(area);
       if (bathrooms.trim()) body.bathrooms = Number(bathrooms);
 
+      body.imageUrl = coverUrl ?? null;
+
       // Add new images
       if (newImages.length > 0) {
-        body.images = newImages.map((asset) => ({
-          url: asset.url,
-          publicId: asset.publicId,
-          type: asset.resourceType === "video" ? "video" : "image",
-        }));
+        body.images = newImages
+          .filter((asset) => asset.url !== coverUrl)
+          .map((asset) => ({
+            url: asset.url,
+            publicId: asset.publicId,
+            type: asset.resourceType === "video" ? "video" : "image",
+          }));
       }
 
       // Add media to delete
@@ -572,7 +595,7 @@ export function AdminListingsPanel({
               </tr>
             </thead>
             <tbody>
-              {initialListings.length === 0 ? (
+              {listings.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -584,7 +607,7 @@ export function AdminListingsPanel({
                   </td>
                 </tr>
               ) : (
-                initialListings.map((item) => (
+                listings.map((item) => (
                   <tr
                     key={item.id}
                     className="border-b border-border/50 last:border-0"
@@ -641,7 +664,7 @@ export function AdminListingsPanel({
             </tbody>
           </table>
 
-          {initialListings.length > 0 && totalPages > 1 ? (
+          {listings.length > 0 && totalPages > 1 ? (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card/70 px-3 py-2">
               <span className="text-xs text-muted-foreground">
                 {locale === "ar" ? "الصفحة" : "Page"} {currentPage} /{" "}
@@ -684,21 +707,24 @@ export function AdminListingsPanel({
             {/* Property Image */}
             <div className="relative h-64 w-full overflow-hidden rounded-t-3xl bg-muted">
               {heroMedia ? (
-                heroMedia.type === "video" ? (
-                  <video
-                    src={heroMedia.url}
-                    controls
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
+                <>
                   <Image
-                    src={heroMedia.url}
+                    src={
+                      "type" in heroMedia && heroMedia.type === "video"
+                        ? getVideoThumbnailUrl(heroMedia.url)
+                        : heroMedia.url
+                    }
                     alt={title}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
                   />
-                )
+                  {"type" in heroMedia && heroMedia.type === "video" ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                      <Video className="h-10 w-10 text-white" />
+                    </div>
+                  ) : null}
+                </>
               ) : (
                 <div className="flex h-full items-center justify-center bg-linear-to-br from-muted to-muted-foreground/20 text-muted-foreground">
                   {locale === "ar" ? "بدون صورة" : "No image"}
@@ -818,6 +844,9 @@ export function AdminListingsPanel({
                       {editingMedia.map((media) => {
                         const isDeleted = existingMediaToDelete.has(media.id);
                         const isVideo = media.type === "video";
+                        const previewUrl = isVideo
+                          ? getVideoThumbnailUrl(media.url)
+                          : media.url;
                         return (
                           <div
                             key={media.id}
@@ -829,7 +858,7 @@ export function AdminListingsPanel({
                             style={{ aspectRatio: "1/1" }}
                           >
                             <Image
-                              src={media.url}
+                              src={previewUrl}
                               alt="Property media"
                               fill
                               quality={80}
@@ -850,9 +879,21 @@ export function AdminListingsPanel({
                                     return next;
                                   });
                                 } else {
-                                  setExistingMediaToDelete((prev) =>
-                                    new Set(prev).add(media.id),
-                                  );
+                                  setExistingMediaToDelete((prev) => {
+                                    const next = new Set(prev);
+                                    next.add(media.id);
+                                    if (coverUrl === media.url) {
+                                      const nextCover =
+                                        newImages[0]?.url ??
+                                        editingMedia.find(
+                                          (m) =>
+                                            m.id !== media.id &&
+                                            !next.has(m.id),
+                                        )?.url;
+                                      setCoverUrl(nextCover);
+                                    }
+                                    return next;
+                                  });
                                 }
                               }}
                               className={`absolute top-1 ${locale === "ar" ? "left-1" : "right-1"} ${
@@ -877,6 +918,20 @@ export function AdminListingsPanel({
                                 </svg>
                               ) : (
                                 <X className="h-3 w-3" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCoverUrl(media.url)}
+                              className={`absolute bottom-1 ${locale === "ar" ? "right-1" : "left-1"} rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100`}
+                            >
+                              {coverUrl === media.url ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Star className="h-3 w-3 text-yellow-300" />
+                                  Cover
+                                </span>
+                              ) : (
+                                <span>Set cover</span>
                               )}
                             </button>
                           </div>
@@ -942,6 +997,9 @@ export function AdminListingsPanel({
                     <div className="grid gap-2 grid-cols-3 sm:grid-cols-4">
                       {newImages.map((asset, index) => {
                         const isVideo = asset.resourceType === "video";
+                        const previewUrl = isVideo
+                          ? getVideoThumbnailUrl(asset.url)
+                          : asset.url;
                         return (
                           <div
                             key={`${index}-${asset.publicId}`}
@@ -949,7 +1007,7 @@ export function AdminListingsPanel({
                             style={{ aspectRatio: "1/1" }}
                           >
                             <Image
-                              src={asset.url}
+                              src={previewUrl}
                               alt="New upload"
                               fill
                               quality={80}
@@ -966,6 +1024,20 @@ export function AdminListingsPanel({
                               className={`absolute top-1 ${locale === "ar" ? "left-1" : "right-1"} bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition z-10`}
                             >
                               <X className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCoverUrl(asset.url)}
+                              className={`absolute bottom-1 ${locale === "ar" ? "right-1" : "left-1"} rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100`}
+                            >
+                              {coverUrl === asset.url ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Star className="h-3 w-3 text-yellow-300" />
+                                  Cover
+                                </span>
+                              ) : (
+                                <span>Set cover</span>
+                              )}
                             </button>
                           </div>
                         );
@@ -990,7 +1062,6 @@ export function AdminListingsPanel({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
-
                   />
                 </div>
 
@@ -1104,7 +1175,10 @@ export function AdminListingsPanel({
                     </div>
 
                     <div>
-                      <Label htmlFor="edit-price-input" className="mb-2 block font-medium">
+                      <Label
+                        htmlFor="edit-price-input"
+                        className="mb-2 block font-medium"
+                      >
                         {priceType === "MONTHLY"
                           ? locale === "ar"
                             ? "السعر الشهري (د.م / MAD)"

@@ -76,10 +76,13 @@ export async function POST(request: Request) {
   const title = body.title?.trim();
   const description = body.description?.trim();
   const city = body.city?.trim();
+  const neighborhood = body.neighborhood?.trim();
   const categoryId = body.categoryId?.trim();
 
-  if (!title || !city || !categoryId) {
-    return jsonError("Fields 'title', 'city', and 'categoryId' are required.");
+  if (!title || !city || !neighborhood || !categoryId) {
+    return jsonError(
+      "Fields 'title', 'city', 'neighborhood', and 'categoryId' are required.",
+    );
   }
 
   // Verify category exists (Category.name is used as the FK)
@@ -125,7 +128,7 @@ export async function POST(request: Request) {
         title,
         description,
         city,
-        neighborhood: body.neighborhood?.trim() || null,
+        neighborhood,
         area: body.area,
         rooms: body.rooms,
         bathrooms: body.bathrooms,

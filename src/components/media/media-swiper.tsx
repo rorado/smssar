@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { getVideoThumbnailUrl } from "../../lib/media";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -81,11 +82,12 @@ export default function MediaSwiper({ media, className = "" }: Props) {
               >
                 {m.resourceType === "video" ? (
                   <div className="relative h-72 w-full overflow-hidden rounded">
-                    <video
-                      src={m.url}
-                      playsInline
-                      muted
-                      className="h-full w-full object-cover"
+                    <Image
+                      src={getVideoThumbnailUrl(m.url)}
+                      alt="property video preview"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 60vw"
                     />
                     <div className="absolute inset-0 grid place-items-center bg-black/20 text-white transition hover:bg-black/10">
                       <div className="rounded-full bg-black/40 px-4 py-2 text-sm font-medium backdrop-blur">

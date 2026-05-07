@@ -34,8 +34,11 @@ export async function POST(request: Request) {
         .upload_stream(
           { resource_type: "auto", folder: propertyUploadsFolder },
           (err, result) => {
-            if (err || !result)
-              return reject(err || new Error("Upload failed"));
+            if (err || !result) {
+              const error = err || new Error("Upload failed");
+              console.error("Cloudinary upload stream error:", error);
+              return reject(error);
+            }
             resolve(result);
           },
         )
@@ -46,11 +49,11 @@ export async function POST(request: Request) {
       publicId: upload.public_id,
       resourceType: upload.resource_type,
     });
-  } catch {
-    return NextResponse.json(
-      { error: "Cloudinary upload failed." },
-      { status: 500 },
-    );
+  } catch (error) {
+    console.error("Upload error details:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Cloudinary upload failed.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 

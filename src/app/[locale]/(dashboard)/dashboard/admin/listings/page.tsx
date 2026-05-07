@@ -85,19 +85,16 @@ export default async function AdminListingsPage({
           select: { id: true, name: true },
           orderBy: { name: "asc" },
         }),
-        prisma.property.findMany({
-          distinct: ["city"],
-          select: { city: true },
-          orderBy: { city: "asc" },
+        prisma.city.findMany({
+          select: { name: true },
+          orderBy: { name: "asc" },
         }),
       ]);
 
     totalCount = countResult;
     listings = listingsResult;
     categories = categoriesResult;
-    cities = Array.from(
-      new Map(citiesResult.map((item) => [item.city, item])).values(),
-    ).map((item) => item.city);
+    cities = citiesResult.map((city) => city.name);
   } catch (err) {
     console.error("Prisma query failed in AdminListingsPage:", err);
     throw err;

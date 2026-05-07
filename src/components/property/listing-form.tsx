@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ImagePlus, Save, Video, X, Loader } from "lucide-react";
+import { ImagePlus, Save, Video, X, Loader, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { getVideoThumbnailUrl } from "../../lib/media";
 import type { Locale } from "@/lib/locales";
 import type { Property } from "@/lib/site-data";
 import type { ReactNode } from "react";
@@ -45,6 +46,9 @@ export function ListingForm({
 }) {
   const router = useRouter();
   const [imageAssets, setImageAssets] = useState<UploadedAsset[]>([]);
+  const [coverUrl, setCoverUrl] = useState<string | undefined>(
+    defaultListing?.imageUrl,
+  );
   const [existingMediaToDelete, setExistingMediaToDelete] = useState<
     Set<string>
   >(new Set());
@@ -121,6 +125,25 @@ export function ListingForm({
   }, [imageAssets]);
 
   useEffect(() => {
+    if (coverUrl) return;
+
+    const firstExisting = existingMedia.find(
+      (m) => !existingMediaToDelete.has(m.id),
+    );
+    const next =
+      defaultListing?.imageUrl ?? firstExisting?.url ?? imageAssets[0]?.url;
+    if (!next) return;
+
+    Promise.resolve().then(() => setCoverUrl(next));
+  }, [
+    defaultListing,
+    existingMedia,
+    imageAssets,
+    existingMediaToDelete,
+    coverUrl,
+  ]);
+
+  useEffect(() => {
     savedRef.current = saved;
   }, [saved]);
 
@@ -174,15 +197,15 @@ export function ListingForm({
           body: formData,
         });
 
-        if (!response.ok) {
-          throw new Error("Upload failed");
-        }
+        const data = await response.json();
 
-        const data = (await response.json()) as {
-          url: string;
-          publicId: string;
-          resourceType: "image" | "video" | "raw";
-        };
+        if (!response.ok) {
+          const errorMsg =
+            data?.error ||
+            data?.message ||
+            `Upload failed with status ${response.status}`;
+          throw new Error(errorMsg);
+        }
         setImageAssets((prev) => [
           ...prev,
           {
@@ -194,9 +217,13 @@ export function ListingForm({
       }
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(
-        locale === "ar" ? "تعذر رفع الملفات." : "Could not upload files.",
-      );
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : locale === "ar"
+            ? "تعذر رفع الملفات."
+            : "Could not upload files.";
+      toast.error(errorMsg);
     } finally {
       setUploading(false);
     }
@@ -222,7 +249,16 @@ export function ListingForm({
       return;
     }
 
-    setImageAssets((prev) => prev.filter((_, i) => i !== index));
+    setImageAssets((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      if (asset.url === coverUrl) {
+        const nextCover =
+          next[0]?.url ??
+          existingMedia.find((m) => !existingMediaToDelete.has(m.id))?.url;
+        setCoverUrl(nextCover);
+      }
+      return next;
+    });
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
@@ -363,6 +399,20 @@ export function ListingForm({
               return;
             }
 
+            const imagesForBody = imageAssets
+              .filter((a) => a.url !== coverUrl)
+              .map((a) => ({
+                url: a.url,
+                publicId: a.publicId,
+                type: a.resourceType === "video" ? "video" : "image",
+              }));
+
+            const existingMediaForBody = existingMedia
+              .filter(
+                (m) => !existingMediaToDelete.has(m.id) && m.url !== coverUrl,
+              )
+              .map((m) => ({ id: m.id, url: m.url, type: m.type }));
+
             const body = {
               title: formTitle,
               description: formDescription,
@@ -378,14 +428,9 @@ export function ListingForm({
               categoryId: category,
               featured: false,
               priceType,
-              images: imageAssets.map((a) => ({
-                url: a.url,
-                publicId: a.publicId,
-                type: a.resourceType === "video" ? "video" : "image",
-              })),
-              existingMedia: existingMedia
-                .filter((m) => !existingMediaToDelete.has(m.id))
-                .map((m) => ({ id: m.id, url: m.url, type: m.type })),
+              imageUrl: coverUrl ?? undefined,
+              images: imagesForBody,
+              existingMedia: existingMediaForBody,
               deleteMediaIds: Array.from(existingMediaToDelete),
             } as const;
 
@@ -683,6 +728,9 @@ export function ListingForm({
                   {existingMedia.map((media) => {
                     const isDeleted = existingMediaToDelete.has(media.id);
                     const isVideo = media.type === "video";
+                    const previewUrl = isVideo
+                      ? getVideoThumbnailUrl(media.url)
+                      : media.url;
 
                     return (
                       <div
@@ -694,21 +742,18 @@ export function ListingForm({
                         }`}
                         style={{ aspectRatio: "2/1" }}
                       >
-                        {isVideo ? (
-                          <video
-                            src={media.url}
-                            controls
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <Image
-                            src={media.url}
-                            alt="Property media"
-                            fill
-                            quality={90}
-                            priority={false}
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                        <Image
+                          src={previewUrl}
+                          alt="Property media"
+                          fill
+                          quality={90}
+                          priority={false}
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {isVideo && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                            <Video className="h-6 w-6 text-white" />
+                          </div>
                         )}
                         <button
                           type="button"
@@ -747,6 +792,26 @@ export function ListingForm({
                             </svg>
                           ) : (
                             <X className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // mark this existing media as cover
+                            if (coverUrl === media.url) return;
+                            setCoverUrl(media.url);
+                          }}
+                          className={`absolute bottom-1 ${locale === "ar" ? "right-1" : "left-1"} bg-black/60 text-white rounded-full px-2 py-1 text-xs opacity-0 group-hover:opacity-100 transition z-10`}
+                        >
+                          {coverUrl === media.url ? (
+                            <span className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-300" />
+                              Cover
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              Set cover
+                            </span>
                           )}
                         </button>
                       </div>
@@ -819,6 +884,9 @@ export function ListingForm({
                 <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
                   {imageAssets.map((asset, index) => {
                     const isVideo = asset.resourceType === "video";
+                    const previewUrl = isVideo
+                      ? getVideoThumbnailUrl(asset.url)
+                      : asset.url;
                     return (
                       <div
                         key={index}
@@ -826,7 +894,7 @@ export function ListingForm({
                         style={{ aspectRatio: "2/1" }}
                       >
                         <Image
-                          src={asset.url}
+                          src={previewUrl}
                           alt={`Property ${isVideo ? "video" : "image"} ${index + 1}`}
                           fill
                           quality={90}
@@ -844,6 +912,25 @@ export function ListingForm({
                           className={`absolute top-1 ${locale === "ar" ? "left-1" : "right-1"} bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition z-10`}
                         >
                           <X className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (coverUrl === asset.url) return;
+                            setCoverUrl(asset.url);
+                          }}
+                          className={`absolute bottom-1 ${locale === "ar" ? "right-1" : "left-1"} bg-black/60 text-white rounded-full px-2 py-1 text-xs opacity-0 group-hover:opacity-100 transition z-10`}
+                        >
+                          {coverUrl === asset.url ? (
+                            <span className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-300" />
+                              Cover
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              Set cover
+                            </span>
+                          )}
                         </button>
                       </div>
                     );
