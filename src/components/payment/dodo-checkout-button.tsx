@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ export function DodoCheckoutButton({
   planName,
   locale,
 }: DodoCheckoutButtonProps) {
+  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCheckout = async () => {
@@ -37,22 +39,33 @@ export function DodoCheckoutButton({
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/payments/dodo-checkout", {
+      const response = await fetch("/api/payments/plans/dodo-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ planId, locale, returnTo: pathname }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = (await response.json()) as {
+          error?: string;
+          loginUrl?: string;
+        };
+
+        if (response.status === 401 && error.loginUrl) {
+          window.location.href = error.loginUrl;
+          return;
+        }
+
         throw new Error(error.error || "Checkout failed");
       }
 
-      const { checkoutUrl } = await response.json();
+      const result = (await response.json()) as {
+        checkoutUrl?: string;
+      };
 
-      if (checkoutUrl) {
+      if (result.checkoutUrl) {
         // Redirect to Dodo checkout
-        window.location.href = checkoutUrl;
+        window.location.href = result.checkoutUrl;
       } else {
         throw new Error("No checkout URL returned");
       }
@@ -153,11 +166,7 @@ export function DodoCheckoutButton({
             className="flex-1"
             disabled={isLoading}
           >
-            {locale === "ar"
-              ? "العودة"
-              : locale === "fr"
-                ? "Retour"
-                : "Back"}
+            {locale === "ar" ? "العودة" : locale === "fr" ? "Retour" : "Back"}
           </Button>
         </div>
 

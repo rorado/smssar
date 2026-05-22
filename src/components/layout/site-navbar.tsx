@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import type { Session } from "next-auth";
 import {
   ChevronDown,
@@ -35,6 +36,7 @@ export function SiteNavbar({
   session?: Session | null;
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const role = session?.user?.role;
   const showSellerLink = role === "SELLER";
   const showAdminLink = role === "ADMIN";
@@ -75,6 +77,11 @@ export function SiteNavbar({
     links.push({ key: "profile", href: `/${locale}/dashboard/profile` });
   }
 
+  const isActiveLink = (href: string, key: keyof Messages["nav"]) =>
+    key === "home"
+      ? pathname === href
+      : pathname === href || pathname.startsWith(`${href}/`);
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
@@ -108,8 +115,22 @@ export function SiteNavbar({
             <Link
               key={key}
               href={href}
-              className="rounded-full px-4 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+              aria-current={isActiveLink(href, key) ? "page" : undefined}
+              className={cn(
+                "group relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300",
+                isActiveLink(href, key)
+                  ? "bg-linear-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
             >
+              <span
+                className={cn(
+                  "absolute inset-x-4 -bottom-0.5 h-px rounded-full bg-white/70 opacity-0 transition-opacity",
+                  isActiveLink(href, key)
+                    ? "opacity-100"
+                    : "group-hover:opacity-60",
+                )}
+              />
               {messages.nav[key as keyof Messages["nav"]]}
             </Link>
           ))}
@@ -253,8 +274,22 @@ export function SiteNavbar({
               <Link
                 key={key}
                 href={href}
-                className="rounded-2xl border border-border/70 bg-card px-4 py-3 text-sm font-medium text-foreground transition hover:bg-muted/70"
+                aria-current={isActiveLink(href, key) ? "page" : undefined}
+                className={cn(
+                  "group relative overflow-hidden rounded-2xl border px-4 py-3 text-sm font-medium transition-all duration-300",
+                  isActiveLink(href, key)
+                    ? "border-violet-500/30 bg-linear-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
+                    : "border-border/70 bg-card text-foreground hover:border-violet-500/30 hover:bg-muted/70 hover:shadow-sm",
+                )}
               >
+                <span
+                  className={cn(
+                    "absolute right-3 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-violet-200 transition-opacity rtl:right-auto rtl:left-3",
+                    isActiveLink(href, key)
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-60",
+                  )}
+                />
                 {messages.nav[key]}
               </Link>
             ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   ArrowRight,
   BadgeCheck,
@@ -24,12 +25,14 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Messages } from "@/lib/messages";
+import type { Locale } from "@/lib/locales";
 
 export type PaymentCopy = Messages["payment"];
 
 export type PaymentFormProps = {
   copy: PaymentCopy;
   planId: string;
+  locale?: Locale;
   amount?: string;
   planName?: string;
   className?: string;
@@ -45,10 +48,12 @@ const visibleMethods = ["card", "wallet"] as const;
 export function PaymentForm({
   copy,
   planId,
+  locale = "en",
   amount = "1,250 DH",
   planName = "Premium listing package",
   className,
 }: PaymentFormProps) {
+  const pathname = usePathname();
   const [method, setMethod] =
     useState<keyof PaymentCopy["form"]["methods"]>("card");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,6 +69,8 @@ export function PaymentForm({
     const formData = new FormData(event.currentTarget);
     const payload = {
       planId,
+      locale,
+      returnTo: pathname,
       paymentMethod: method,
       cardholder: String(formData.get("cardholder") ?? "").trim(),
       email: String(formData.get("email") ?? "").trim(),
@@ -82,7 +89,7 @@ export function PaymentForm({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/payments/dodo-checkout", {
+      const response = await fetch("/api/payments/plans/dodo-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,11 +97,23 @@ export function PaymentForm({
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
+        const result = (await response.json()) as {
+          error?: string;
+          loginUrl?: string;
+        };
+
+        if (response.status === 401 && result.loginUrl) {
+          window.location.href = result.loginUrl;
+          return;
+        }
+
         throw new Error(result.error || "Checkout failed");
       }
+
+      const result = (await response.json()) as {
+        checkoutUrl?: string;
+      };
 
       if (!result.checkoutUrl) {
         throw new Error("Missing checkout URL");
