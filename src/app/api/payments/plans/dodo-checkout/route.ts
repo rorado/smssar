@@ -10,7 +10,6 @@ type DodoCheckoutRequest = {
   locale?: Locale;
   returnTo?: string;
   paymentMethod?: string;
-  cardholder?: string;
   email?: string;
   address?: string;
   city?: string;
@@ -24,15 +23,8 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     const body: DodoCheckoutRequest = await req.json();
-    const {
-      planId,
-      cardholder,
-      email,
-      paymentMethod,
-      activationMode,
-      locale,
-      returnTo,
-    } = body;
+    const { planId, email, paymentMethod, activationMode, locale, returnTo } =
+      body;
 
     const safeLocale: Locale =
       locale === "ar" || locale === "fr" ? locale : "en";
@@ -209,8 +201,7 @@ export async function POST(req: NextRequest) {
     }
 
     const customerEmail = email || session.user.email;
-    const customerName = cardholder || session.user.name || "Customer";
-
+    const customerName = session.user.name || "Customer";
     const localSessionId =
       typeof globalThis.crypto?.randomUUID === "function"
         ? globalThis.crypto.randomUUID()
@@ -238,6 +229,7 @@ export async function POST(req: NextRequest) {
       return_url: returnUrlWithSession,
       cancel_url: `${BASE_URL}/${safeLocale}/pricing`,
     };
+    console.log(checkoutPayload);
     const dodoResponse = await fetch(`${DODO_API_BASE_URL}/checkouts`, {
       method: "POST",
       headers: {
