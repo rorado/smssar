@@ -15,6 +15,8 @@ import {
 } from "@/lib/getActiveSubscription";
 import { formatCurrency } from "@/lib/format";
 
+export const dynamic = "force-dynamic";
+
 type Plan = {
   id: string;
   title: string;
