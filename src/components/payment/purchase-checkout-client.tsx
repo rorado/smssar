@@ -114,8 +114,25 @@ export function PurchaseCheckoutClient({
     const current = selectedItems[productId] || 0;
     if (current > 1) {
       handleQuantityChange(productId, current - 1);
+    } else if (current === 1) {
+      setSelectedItems((prev) => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      });
     }
   };
+
+  const minPurchaseAmount = 10;
+  const isPurchaseTooLow =
+    selectedProducts.length > 0 && totalPrice < minPurchaseAmount;
+
+  const minPurchaseMessage =
+    locale === "ar"
+      ? `يجب أن يكون المجموع ${formatCurrency(minPurchaseAmount, locale)} أو أكثر لإتمام الدفع.`
+      : locale === "fr"
+        ? `Le total doit être d'au moins ${formatCurrency(minPurchaseAmount, locale)} pour continuer.`
+        : `Total must be at least ${formatCurrency(minPurchaseAmount, locale)} to proceed.`;
 
   const handleCheckout = async () => {
     if (selectedProducts.length === 0) {
@@ -398,7 +415,9 @@ export function PurchaseCheckoutClient({
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button
           onClick={handleCheckout}
-          disabled={isLoading || selectedProducts.length === 0}
+          disabled={
+            isLoading || selectedProducts.length === 0 || isPurchaseTooLow
+          }
           size="lg"
           className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
         >
@@ -427,6 +446,11 @@ export function PurchaseCheckoutClient({
           )}
         </Button>
       </div>
+      {isPurchaseTooLow ? (
+        <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 dark:border-orange-500/30 dark:bg-orange-950/20 dark:text-orange-200">
+          {minPurchaseMessage}
+        </div>
+      ) : null}
     </div>
   );
 }

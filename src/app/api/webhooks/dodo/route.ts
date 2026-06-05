@@ -96,7 +96,7 @@ function datesEqual(a?: Date | null, b?: Date | null) {
   return a.getTime() === b.getTime();
 }
 
-async function sendBillingNotification(params: {
+export async function sendBillingNotification(params: {
   to?: string | null;
   locale?: string | null;
   kind:
@@ -265,18 +265,6 @@ export const POST = Webhooks({
       }
 
       if (isPurchases) {
-        await sendBillingNotification({
-          to: customerEmail,
-          locale: metadata?.locale,
-          kind: "payment_succeeded",
-          isPurchases: true,
-          userName: user.name,
-          price: resolveMetadataAmount(payload.data?.total_amount),
-          paymentId,
-          purchaseDate: new Date(),
-          createdAt: new Date(),
-        });
-
         let purchases: Array<{ type: string; quantity: number }> = [];
         try {
           purchases = metadata?.purchases ? JSON.parse(metadata.purchases) : [];
@@ -290,7 +278,6 @@ export const POST = Webhooks({
 
         await prisma.$transaction(async (tx) => {
           for (const item of purchases) {
-            // Validate quantity
             if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
               console.error(
                 `Invalid quantity for ${item.type}:`,
